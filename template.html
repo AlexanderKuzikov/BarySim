@@ -59,6 +59,26 @@ input[type=range]{width:130px;accent-color:var(--ink)}
   :root:not([data-theme="light"]) .sw-amber{background:#D89A3E}
 }
 #theme{margin-left:10px}
+.linkbtn{background:none;border:none;padding:0;font:inherit;font-size:12px;color:var(--t3);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.linkbtn:hover{background:none;color:var(--t1)}
+.modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:22px}
+.modal[hidden]{display:none}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.modal-card{position:relative;width:100%;max-width:700px;max-height:88vh;overflow:auto;background:var(--panel);border:.5px solid var(--line);border-radius:16px;padding:30px 34px 26px;opacity:0;transform:translateY(10px);transition:opacity .18s ease,transform .18s ease}
+.modal.on .modal-card{opacity:1;transform:none}
+.modal-x{position:absolute;top:13px;right:15px;width:30px;height:30px;padding:0;border-radius:8px;font-size:17px;line-height:1;color:var(--t2)}
+.modal h2{font-size:17px;font-weight:500;margin-bottom:4px}
+.modal .lead{font-size:12.5px;color:var(--t3);margin-bottom:20px}
+.modal h3{font-size:13.5px;font-weight:500;margin:22px 0 7px}
+.modal p{font-size:13.5px;line-height:1.65;margin-bottom:9px}
+.modal p.muted{color:var(--t2)}
+.formula{margin:12px 0 8px;padding:11px 16px;background:var(--bg);border-radius:10px;font-family:ui-monospace,Consolas,monospace;font-size:13px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0 6px}
+.stat{background:var(--bg);border-radius:10px;padding:11px 12px}
+.stat b{display:block;font-size:16px;font-weight:500;font-variant-numeric:tabular-nums}
+.stat span{display:block;font-size:11px;color:var(--t3);margin-top:3px;line-height:1.35}
+.foot{font-size:11px;color:var(--t3);margin-top:20px;text-align:right}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.modal-card{padding:26px 20px 22px}}
 main{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:12px 14px 10px;min-width:0}
 .panel h2{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
@@ -76,7 +96,7 @@ canvas{display:block;width:100%}
 <header>
   <div>
     <h1>Барицентр Солнечной системы</h1>
-    <div class="sub">Эфемериды JPL DE441, шаг 10 суток, 1500–2500</div>
+    <div class="sub">Эфемериды JPL DE441, шаг 10 суток, 1500–2500 · <button class="linkbtn" id="about">как это читать</button></div>
   </div>
   <div class="clock">
     <div class="d" id="date">—</div>
@@ -123,6 +143,49 @@ canvas{display:block;width:100%}
   <div style="position:relative"><canvas id="c3"></canvas><div class="sel" id="sel"></div></div>
   <div class="cap">Горизонталь — фотосфера, 695 700 км. Ниже неё барицентр внутри Солнца. Тяните по графику, чтобы менять дату; Shift + протяжка — выбрать окно.</div>
 </section>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-bg" id="mbg"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <button class="modal-x" id="mclose" aria-label="Закрыть">×</button>
+    <h2 id="mtitle">Что здесь происходит</h2>
+    <div class="lead">Солнце не стоит на месте — и вот почему.</div>
+
+    <h3>Барицентр</h3>
+    <p>Это центр масс системы. Два тела обращаются не друг вокруг друга, а вокруг общей точки: она делит расстояние между ними обратно пропорционально массам. Тяжёлое тело описывает малую орбиту, лёгкое — большую.</p>
+    <svg viewBox="0 0 620 150" width="100%" role="img" aria-label="Схема: тяжёлое тело, лёгкое тело и общий центр масс ближе к тяжёлому">
+      <circle cx="120" cy="75" r="34" style="fill:var(--t3);opacity:.22"/>
+      <circle cx="470" cy="75" r="13" style="fill:var(--t3);opacity:.22"/>
+      <line x1="120" y1="75" x2="470" y2="75" style="stroke:var(--t3);stroke-width:1;stroke-dasharray:3 3"/>
+      <circle cx="163" cy="75" r="4.5" style="fill:var(--red)"/>
+      <text x="141" y="93" text-anchor="middle" style="fill:var(--t2);font:11px -apple-system,Segoe UI,sans-serif">r₁</text>
+      <text x="316" y="93" text-anchor="middle" style="fill:var(--t2);font:11px -apple-system,Segoe UI,sans-serif">r₂</text>
+      <text x="163" y="52" text-anchor="middle" style="fill:var(--red);font:11px -apple-system,Segoe UI,sans-serif">барицентр</text>
+      <text x="120" y="128" text-anchor="middle" style="fill:var(--t3);font:11px -apple-system,Segoe UI,sans-serif">тяжёлое тело</text>
+      <text x="470" y="110" text-anchor="middle" style="fill:var(--t3);font:11px -apple-system,Segoe UI,sans-serif">лёгкое</text>
+    </svg>
+    <p class="muted">Точка ближе к тяжёлому телу во столько раз, во сколько оно тяжелее: r₁·m₁ = r₂·m₂.</p>
+    <div class="formula">R = (m₁r₁ + m₂r₂ + …) / (m₁ + m₂ + …)</div>
+    <p class="muted">R — смещение барицентра от центра Солнца.</p>
+
+    <h3>Почему Солнце ходит</h3>
+    <p>Солнце тяжелее Юпитера в 1047 раз — но не бесконечно. Планеты тянут его к себе, и центр Солнца описывает вокруг барицентра петлю размером до 1,5 млн км, то есть больше двух своих радиусов.</p>
+    <div class="stats">
+      <div class="stat"><b>742 000</b><span>км даёт Юпитер</span></div>
+      <div class="stat"><b>449</b><span>км даёт Земля</span></div>
+      <div class="stat"><b>1 494 409</b><span>км максимум, 1664 год</span></div>
+      <div class="stat"><b>62 %</b><span>времени вне фотосферы</span></div>
+    </div>
+
+    <h3>Земля — не вокруг барицентра</h3>
+    <p>Земля обращается вокруг Солнца, точнее — вокруг барицентра пары Земля–Солнце, который лежит в 449 км от центра Солнца. Общий барицентр системы находится в 781 тыс. км от него и фокусом земной орбиты не является.</p>
+    <p class="muted">Геометрически в барицентрической системе отсчёта любое тело обращается вокруг барицентра. Динамически Земля привязана к Солнцу — это разные утверждения, и второе здесь важнее.</p>
+
+    <h3>Откуда числа</h3>
+    <p>Положение барицентра — JPL Horizons, эфемериды DE441, шаг 10 суток, 1500–2500, 36 524 точки. Планеты в первом ракурсе считаются по кеплеровским элементам: там важна угловая позиция, а не расстояние.</p>
+    <div class="foot">Esc — закрыть</div>
+  </div>
+</div>
 
 <script>
 const HZ = {{DATA}};
@@ -538,6 +601,23 @@ if(window.matchMedia){
   const mq=window.matchMedia("(prefers-color-scheme: dark)");
   if(mq.addEventListener) mq.addEventListener("change",()=>{if(!manual)applyTheme();});
 }
+
+const modal=document.getElementById("modal"), mclose=document.getElementById("mclose");
+let lastFocus=null;
+function openModal(){
+  lastFocus=document.activeElement;
+  modal.hidden=false;
+  requestAnimationFrame(()=>modal.classList.add("on"));
+  mclose.focus();
+}
+function closeModal(){
+  modal.classList.remove("on");
+  setTimeout(()=>{modal.hidden=true; if(lastFocus&&lastFocus.focus)lastFocus.focus();},180);
+}
+document.getElementById("about").addEventListener("click",openModal);
+mclose.addEventListener("click",closeModal);
+document.getElementById("mbg").addEventListener("click",closeModal);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.hidden)closeModal();});
 
 resize();
 applyTheme();

@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,openModal,closeModal};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -15,6 +15,7 @@ const ok = (name, cond, detail) => {
 };
 
 const listeners = { win: {}, el: {} };
+const docL = {};
 function ctxStub() {
   const t = {};
   return new Proxy(t, {
@@ -37,6 +38,7 @@ function el(id, parent) {
       contains(c) { return this._s.has(c); }
     },
     addEventListener(t, f) { (this._l[t] = this._l[t] || []).push(f); },
+    focus() {},
     getContext() { return ctxStub(); },
     getBoundingClientRect() { return { left: 0, top: 0, width: 900, height: 190 }; },
     closest(sel) { return this.dataset && this.dataset.a ? this : null; },
@@ -51,10 +53,11 @@ const panels = {
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
-['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme'].forEach(id => {
+['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about'].forEach(id => {
   nodes[id] = el(id, panels[id] || null);
 });
 nodes.speed.value = '3';
+nodes.modal.hidden = true;
 const chipBtns = ['1500','1600','1800','1900','1960'].map((a, i) => {
   const b = el('chip' + i, null);
   b.dataset = { a: a, b: ['2500','1800','2200','2100','2040'][i] };
@@ -72,9 +75,10 @@ const sandbox = {
     createElement: tag => el('tmp', null),
     querySelectorAll: () => [],
     activeElement: null,
+    addEventListener(t, f) { (docL[t] = docL[t] || []).push(f); },
     documentElement: { _a:{}, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }
   },
-  setTimeout: (f, ms) => 0,
+  setTimeout: (f, ms) => { f(); return 0; },
   window: {
     innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1,
     addEventListener(t, f) { (listeners.win[t] = listeners.win[t] || []).push(f); }
@@ -211,6 +215,16 @@ for (let i = 1; i <= 20; i++) {
 ok('шкала монотонна по синему', mono, 'проверено 20 шагов');
 ok('sunShift нормирует на 1.5 млн', Math.abs(T.sunShift(T.jd(1804,4,19)) - 1466025/1.5e6) < 0.01,
    T.sunShift(T.jd(1804,4,19)).toFixed(3));
+
+ok('окно теории закрыто при старте', nodes.modal.hidden === true, 'hidden=' + nodes.modal.hidden);
+nodes.about._l.click[0]();
+frame(1);
+ok('кнопка открывает окно', nodes.modal.hidden === false && nodes.modal.classList.contains('on'), 'hidden=' + nodes.modal.hidden);
+docL.keydown[0]({ key: 'Escape' });
+ok('Escape закрывает окно', nodes.modal.hidden === true, 'hidden=' + nodes.modal.hidden);
+nodes.about._l.click[0]();
+nodes.mbg._l.click[0]();
+ok('клик по фону закрывает', nodes.modal.hidden === true, 'hidden=' + nodes.modal.hidden);
 
 console.log('\nпроверок: ' + checks + ', провалов: ' + fails);
 process.exit(fails ? 1 : 0);
