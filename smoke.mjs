@@ -119,9 +119,9 @@ for (let i = 0; i < T.N; i++) {
   if (T.Rv[i] > mx) { mx = T.Rv[i]; imx = i; }
   if (T.Rv[i] < mn) { mn = T.Rv[i]; imn = i; }
 }
-ok('максимум |R| совпадает с расчётом', Math.abs(mx - 1494409) < 2000, mx.toFixed(0) + ' км');
-ok('минимум |R| совпадает с расчётом', Math.abs(mn - 6522) < 2000, mn.toFixed(0) + ' км');
-ok('точек столько же', T.N === 36524, String(T.N));
+ok('максимум |R| совпадает с расчётом', Math.abs(mx - 1547644) < 2000, mx.toFixed(0) + ' км');
+ok('минимум |R| совпадает с расчётом', Math.abs(mn - 6648) < 2000, mn.toFixed(0) + ' км');
+ok('точек столько же', T.N === 36525, String(T.N));
 
 const d = T.at(2461331.5);
 const R = Math.hypot(d[0], d[1], d[2]);
@@ -178,7 +178,7 @@ T.setWindow(T.T0 + 400 * 365.25, T.T0 + 450 * 365.25);
 nodes.jump.value = '12.03.1600';
 T.applyJump();
 ok('ввод даты вне окна сдвигает окно',
-   T.state.t >= T.state.wa && T.state.t <= T.state.wb && Math.abs(T.state.t - T.T0 - 100 * 365.25) < 400,
+   T.state.t >= T.state.wa && T.state.t <= T.state.wb && Math.abs(T.state.t - T.jd(1600,3,12)) < 2,
    T.fmtIn(T.state.t) + ', окно ' + T.fmtIn(T.state.wa) + '–' + T.fmtIn(T.state.wb));
 
 nodes.jump.value = '2400';
@@ -213,7 +213,7 @@ for (let i = 1; i <= 20; i++) {
   if (b[2] > a[2] + 0.5) mono = false;
 }
 ok('шкала монотонна по синему', mono, 'проверено 20 шагов');
-ok('sunShift нормирует на 1.5 млн', Math.abs(T.sunShift(T.jd(1804,4,19)) - 1466025/1.5e6) < 0.01,
+ok('sunShift нормирует на 1.6 млн', Math.abs(T.sunShift(T.jd(1804,4,19)) - 1466025/1.6e6) < 0.01,
    T.sunShift(T.jd(1804,4,19)).toFixed(3));
 
 ok('окно теории закрыто при старте', nodes.modal.hidden === true, 'hidden=' + nodes.modal.hidden);

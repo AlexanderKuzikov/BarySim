@@ -23,8 +23,8 @@
 
 - `bary.py` — кеплеровская модель планет (элементы Standish) и функция
   смещения барицентра; используется `analyze.py` и `compare.py`.
-- `fetch.py` — выгрузка векторов барицентра из JPL Horizons в `h1500.txt`.
-- `build_data.py` — разбор `h1500.txt` в `hz.json` (плоский массив x,y,z).
+- `fetch.py` — выгрузка векторов барицентра из JPL Horizons в `horizons_bary.txt`.
+- `build_data.py` — разбор `horizons_bary.txt` в `hz.json` (плоский массив x,y,z).
 - `template.html` — шаблон страницы с плейсхолдером `{{DATA}}`.
 - `build.py` — подстановка `hz.json` в шаблон, результат `barycenter.html`.
 - `template_cinematic.html` — шаблон кинематографической сцены, тот же `{{DATA}}`.
@@ -36,7 +36,7 @@
 
 ## Не трогать
 
-- `h1500.txt` — 7 МБ сырого дампа Horizons, в git не хранится, восстанавливается
+- `horizons_bary.txt` — 7 МБ сырого дампа Horizons, в git не хранится, восстанавливается
   через `fetch.py`.
 - `hz.json` — производный файл, но лежит в репозитории намеренно: без него
   `build.py` не работает офлайн.
