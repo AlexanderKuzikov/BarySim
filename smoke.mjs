@@ -50,13 +50,18 @@ function el(id, parent) {
   return e;
 }
 
+const winStub = { innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1, addEventListener(t, f) { (listeners.win[t] = listeners.win[t] || []).push(f); } };
+function colWidth() {
+  const inner = Math.min(winStub.innerWidth, 1560) - 46;
+  return winStub.innerWidth < 1080 ? inner : Math.floor((inner - 270 - 24) / 2);
+}
 const panels = {
-  c1: { clientWidth: 620, style: {}, classList: { contains: c => c === 'panel' },
+  c1: { get clientWidth() { return colWidth(); }, style: {}, classList: { contains: c => c === 'panel' },
         get offsetHeight() {
           const c = 104 + (parseInt(nodes.c1.style.height) || 0);
           return this.style.alignSelf === 'start' ? c : Math.max(c, 480);
         } },
-  c2: { clientWidth: 620, style: {}, classList: { contains: c => c === 'panel' },
+  c2: { get clientWidth() { return colWidth(); }, style: {}, classList: { contains: c => c === 'panel' },
         get offsetHeight() {
           const c = 96 + (parseInt(nodes.c2.style.height) || 0);
           return this.style.alignSelf === 'start' ? c : Math.max(c, 480);
@@ -97,10 +102,7 @@ const sandbox = {
     documentElement: { _a:{}, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }
   },
   setTimeout: (f, ms) => { f(); return 0; },
-  window: {
-    innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1,
-    addEventListener(t, f) { (listeners.win[t] = listeners.win[t] || []).push(f); }
-  },
+  window: winStub,
   performance: { now: () => now },
   requestAnimationFrame: f => { rafQ.push(f); }
 };
@@ -257,17 +259,13 @@ ok('иконка встроена как data-uri', /<link rel="icon"[^>]*href="
 ok('логотип в шапке', /<svg class="mark"/.test(html), 'есть');
 ok('внешних ссылок нет', !/https?:\/\//.test(html), 'ни одной');
 
-ok('колонки заданы явно', /^\d+px \d+px 300px$/.test(mainStub.style.gridTemplateColumns || ''),
-   mainStub.style.gridTemplateColumns);
-ok('панели выровнены по высоте', nodes.c1.parentElement.style.minHeight === nodes.c2.parentElement.style.minHeight,
-   nodes.c1.parentElement.style.minHeight);
+ok('колонки из CSS, не инлайновые', (mainStub.style.gridTemplateColumns || '') === '',
+   'инлайн пуст');
 
 sandbox.window.innerWidth = 1000; sandbox.window.innerHeight = 1400;
 T.resize();
-ok('узкий экран — одна колонка', /^\d+px$/.test(mainStub.style.gridTemplateColumns || ''),
-   mainStub.style.gridTemplateColumns);
 const [nw, nh] = T.getSizes();
-ok('узкий экран — сцена квадратная', nw === nh && nw <= 560, nw + '×' + nh);
+ok('узкий экран — сцена по ширине колонки', nw === nh && nw <= Math.min(1000, 1560) - 46, nw + '×' + nh);
 sandbox.window.innerWidth = 1440; sandbox.window.innerHeight = 900;
 T.resize();
 
@@ -284,7 +282,7 @@ const [fw] = T.getSizes();
 ok('на 1920×1080 влезает по вертикали', 30 + 56 + 12 + fw + 104 + 12 + 240 <= 1080,
    fw + ' px сцена, итого ' + (30 + 56 + 12 + fw + 104 + 12 + 240) + ' из 1080');
 ok('на FullHD сцена крупнее', fw > w1, fw + ' > ' + w1);
-ok('на FullHD влезает по ширине', 2*(fw+26)+300+24 <= 1524, (2*(fw+26)+300+24) + ' из 1524');
+ok('сцена не шире колонки', fw <= Math.floor((1514-270-24)/2), fw + ' из ' + Math.floor((1514-270-24)/2));
 sandbox.window.innerWidth = 1440; sandbox.window.innerHeight = 900;
 T.resize();
 

@@ -9,3 +9,4 @@ shot*.png
 check.js
 _*.js
 _*.html
+_*.mjs
