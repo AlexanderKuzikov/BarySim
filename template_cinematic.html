@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BarySim — кино</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#05060A;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+.hud{position:fixed;left:34px;bottom:30px;color:#fff;font:13px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif;pointer-events:none;transition:opacity .5s}
+.hud .cap{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-bottom:7px}
+.hud .d{font-size:26px;font-weight:300;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.hud .v{font-size:12px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;margin-top:3px}
+.bar{position:fixed;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.08)}
+.bar i{display:block;height:100%;background:rgba(255,255,255,.55);width:0}
+.hint{position:fixed;right:30px;bottom:26px;color:rgba(255,255,255,.28);font:11px/1 -apple-system,"Segoe UI",sans-serif;letter-spacing:.06em;transition:opacity .8s}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div class="hud" id="hud">
+  <div class="cap" id="cap"></div>
+  <div class="d" id="date">—</div>
+  <div class="v" id="dist"></div>
+</div>
+<div class="bar"><i id="prog"></i></div>
+<div class="hint" id="hint">пробел — пауза</div>
+<script>
+const HZ = {{DATA}};
+const RS = 695700, AU = 149597870.7, RAD = Math.PI/180, TAU = Math.PI*2;
+const N = HZ.n, T0 = HZ.t0, ST = HZ.step, D = HZ.d;
+
+function bary(t){
+  let f=(t-T0)/ST; if(f<0)f=0; if(f>N-1)f=N-1;
+  const i=Math.floor(f), j=Math.min(i+1,N-1), a=f-i;
+  return [D[3*i]*(1-a)+D[3*j]*a, D[3*i+1]*(1-a)+D[3*j+1]*a, D[3*i+2]*(1-a)+D[3*j+2]*a];
+}
+function Rof(t){const p=bary(t);return Math.hypot(p[0],p[1],p[2]);}
+
+const MON=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+function jdToDate(j){
+  const z=Math.floor(j+0.5); let A=z;
+  if(z>=2299161){const al=Math.floor((z-1867216.25)/36524.25); A=z+1+al-Math.floor(al/4);}
+  const B=A+1524, C=Math.floor((B-122.1)/365.25), Dd=Math.floor(365.25*C), E=Math.floor((B-Dd)/30.6001);
+  const day=B-Dd-Math.floor(30.6001*E), m=E<14?E-1:E-13, y=m>2?C-4716:C-4715;
+  return {y:y,m:m,d:Math.floor(day)};
+}
+function jd(y,m,d){if(m<=2){y--;m+=12;}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;}
+function fmt(j){const o=jdToDate(j);return o.d+" "+MON[o.m-1]+" "+o.y;}
+function num(v){return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g,"\u2009");}
+
+const PL=[
+ {n:"Меркурий",a:0.38709927,e:0.20563593,i:7.00497902,L:252.25032350,p:77.45779628,o:48.33076593,da:0.00000037,de:0.00001906,di:-0.00594749,dL:149472.67411175,dp:0.16047689,do:-0.12534081,c:[150,158,168],s:1.5},
+ {n:"Венера",a:0.72333566,e:0.00677672,i:3.39467605,L:181.97909950,p:131.60246718,o:76.67984255,da:0.00000390,de:-0.00004107,di:-0.00078890,dL:58517.81538729,dp:0.00268329,do:-0.27769418,c:[232,196,138],s:2.0},
+ {n:"Земля",a:1.00000261,e:0.01671123,i:-0.00001531,L:100.46457166,p:102.93768193,o:0.0,da:0.00000562,de:-0.00004392,di:-0.01294668,dL:35999.37244981,dp:0.32327364,do:0.0,c:[76,158,232],s:2.2},
+ {n:"Марс",a:1.52371034,e:0.09339410,i:1.84969142,L:-4.55343205,p:-23.94362959,o:49.55953891,da:0.00001847,de:0.00007882,di:-0.00813131,dL:19140.30268499,dp:0.44441088,do:-0.29257343,c:[210,105,74],s:1.8},
+ {n:"Юпитер",a:5.20288700,e:0.04838624,i:1.30439695,L:34.39644051,p:14.72847983,o:100.47390909,da:-0.00011607,de:-0.00013253,di:-0.00183714,dL:3034.74612775,dp:0.21252668,do:0.20469106,c:[217,160,91],s:4.4},
+ {n:"Сатурн",a:9.53667594,e:0.05386179,i:2.48599187,L:49.95424423,p:92.59887831,o:113.66242448,da:-0.00125060,de:-0.00050991,di:0.00193609,dL:1222.49362201,dp:-0.41897216,do:-0.28867794,c:[227,200,138],s:3.8},
+ {n:"Уран",a:19.18916464,e:0.04725744,i:0.77263783,L:313.23810451,p:170.95427630,o:74.01692503,da:-0.00196176,de:-0.00004397,di:-0.00242939,dL:428.48202785,dp:0.40805281,do:0.04240589,c:[143,211,216],s:3.0},
+ {n:"Нептун",a:30.06992276,e:0.00859048,i:1.77004347,L:-55.12002969,p:44.96476227,o:131.78422574,da:0.00026291,de:0.00005105,di:0.00035372,dL:218.45945325,dp:-0.32241464,do:-0.00508664,c:[91,123,224],s:3.0}
+];
+
+function planetPos(P,T){
+  const a=P.a+P.da*T, e=P.e+P.de*T, I=(P.i+P.di*T)*RAD;
+  const L=P.L+P.dL*T, p=P.p+P.dp*T, o=P.o+P.do*T;
+  let M=((L-p)%360+360)%360*RAD;
+  let E=M; for(let k=0;k<7;k++) E-=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));
+  const xo=a*(Math.cos(E)-e), yo=a*Math.sqrt(1-e*e)*Math.sin(E);
+  const w=(p-o)*RAD, O=o*RAD, cw=Math.cos(w), sw=Math.sin(w), cO=Math.cos(O), sO=Math.sin(O), cI=Math.cos(I), sI=Math.sin(I);
+  return [
+    (cw*cO-sw*sO*cI)*xo+(-sw*cO-cw*sO*cI)*yo,
+    (cw*sO+sw*cO*cI)*xo+(-sw*sO+cw*cO*cI)*yo,
+    (sw*sI)*xo+(cw*sI)*yo
+  ];
+}
+
+const cv=document.getElementById("stage"), g=cv.getContext("2d");
+let W=0,H=0,DPR=1;
+
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,1.6);
+  W=window.innerWidth; H=window.innerHeight;
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  g.setTransform(DPR,0,0,DPR,0,0);
+  makeStars();
+}
+
+function proj(p,cam){
+  const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw);
+  const x1=p[0]*cy-p[1]*sy, y1=p[0]*sy+p[1]*cy, z=p[2];
+  const ce=Math.cos(cam.el), se=Math.sin(cam.el);
+  const d=y1*ce-z*se+cam.dist;
+  if(d<1e-6) return null;
+  const v=y1*se+z*ce;
+  const f=(H/2)/Math.tan(cam.fov/2);
+  return {x:W/2+f*x1/d, y:H/2-f*v/d, d:d, s:f/d};
+}
+
+const LOG_A=0.3587, LOG_B=0.1884;
+function compress(rAU){
+  if(rAU<=0) return 0;
+  return Math.max(0.012, LOG_A+LOG_B*Math.log(rAU));
+}
+
+let stars=[];
+function makeStars(){
+  stars=[];
+  for(let i=0;i<520;i++){
+    stars.push({x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.1+0.25, a:Math.random()*0.5+0.12, ph:Math.random()*TAU});
+  }
+}
+
+const spr={};
+function makeSprite(size, stops){
+  const c=document.createElement("canvas"); c.width=c.height=size;
+  const x=c.getContext("2d");
+  const gr=x.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+  for(const [o,col] of stops) gr.addColorStop(o,col);
+  x.fillStyle=gr; x.fillRect(0,0,size,size);
+  return c;
+}
+function initSprites(){
+  spr.glowSun=makeSprite(256,[[0,"rgba(255,246,225,1)"],[0.18,"rgba(255,214,150,0.95)"],[0.42,"rgba(255,150,70,0.42)"],[0.72,"rgba(226,96,34,0.11)"],[1,"rgba(180,60,20,0)"]]);
+  spr.core=makeSprite(64,[[0,"rgba(255,255,255,1)"],[0.45,"rgba(255,240,205,0.85)"],[1,"rgba(255,200,120,0)"]]);
+  spr.halo=makeSprite(128,[[0,"rgba(255,190,120,0.55)"],[0.5,"rgba(255,140,70,0.16)"],[1,"rgba(255,120,60,0)"]]);
+  spr.dot={};
+  for(const P of PL){
+    const c=P.c;
+    spr.dot[P.n]=makeSprite(64,[[0,`rgba(255,255,255,0.95)`],[0.22,`rgba(${c[0]},${c[1]},${c[2]},0.95)`],[0.5,`rgba(${c[0]},${c[1]},${c[2]},0.28)`],[1,`rgba(${c[0]},${c[1]},${c[2]},0)`]]);
+  }
+  spr.mark=makeSprite(96,[[0,"rgba(140,255,230,0.9)"],[0.35,"rgba(90,220,205,0.25)"],[1,"rgba(60,200,190,0)"]]);
+}
+
+function drawGlow(img,x,y,r,alpha){
+  if(r<=0) return;
+  g.globalAlpha=alpha;
+  g.drawImage(img,x-r,y-r,r*2,r*2);
+  g.globalAlpha=1;
+}
+
+const SHOTS=[
+  {dur:10.0, rate:6.0, cap:"Солнечная система"},
+  {dur:4.5,  rate:6.0, cap:"приближение"},
+  {dur:16.0, rate:1.2, cap:"Солнце и барицентр"}
+];
+const TOTAL=SHOTS.reduce((a,s)=>a+s.dur,0);
+
+const state={clock:0, sim:0, playing:true, flash:0};
+function initSim(){
+  state.clock=0;
+  state.sim=jd(1709,1,1);
+}
+initSim();
+
+function shotAt(c){
+  let acc=0;
+  for(let i=0;i<SHOTS.length;i++){
+    if(c<acc+SHOTS[i].dur) return {i, local:c-acc, k:(c-acc)/SHOTS[i].dur};
+    acc+=SHOTS[i].dur;
+  }
+  return {i:SHOTS.length-1, local:SHOTS[SHOTS.length-1].dur, k:1};
+}
+
+function easeInOut(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+function easeOut(t){return 1-Math.pow(1-t,3);}
+
+function drawStars(cam){
+  const t=performance.now()/1000;
+  for(const s of stars){
+    const a=s.a*(0.75+0.25*Math.sin(t*0.7+s.ph));
+    g.globalAlpha=a; g.fillStyle="#cfd8ea";
+    g.beginPath(); g.arc(s.x,s.y,s.r,0,TAU); g.fill();
+  }
+  g.globalAlpha=1;
+}
+
+function drawSystem(simT, k){
+  const T=(simT-2451545.0)/36525;
+  const yaw=0.06*state.clock+0.4;
+  const cam={yaw:yaw, el:(58-8*k)*RAD, dist:3.05-2.98*easeInOut(k), fov:46*RAD};
+  if(k>0.62) cam.dist=Math.max(cam.dist,0.045);
+
+  g.globalCompositeOperation="source-over";
+  drawStars(cam);
+
+  g.globalCompositeOperation="lighter";
+  const fade=1-Math.max(0,(k-0.45)/0.55);
+
+  if(fade>0.01) for(const P of PL){
+    const ring=[];
+    for(let a=0;a<=180;a++){
+      const ang=a/180*TAU, rho=compress(P.a);
+      const p=proj([rho*Math.cos(ang),rho*Math.sin(ang),0],cam);
+      if(p&&Math.abs(p.x)<W*4&&Math.abs(p.y)<H*4) ring.push(p);
+    }
+    g.beginPath();
+    ring.forEach((p,i)=>i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));
+    g.strokeStyle=`rgba(150,180,225,${0.10*fade})`;
+    g.lineWidth=1; g.stroke();
+  }
+
+  const bodies=[];
+  for(const P of PL){
+    const pos=planetPos(P,T), rho=compress(Math.hypot(pos[0],pos[1]));
+    const ang=Math.atan2(pos[1],pos[0]);
+    const wp=[rho*Math.cos(ang),rho*Math.sin(ang),0];
+    const p=proj(wp,cam);
+    if(p&&Math.abs(p.x)<W*4&&Math.abs(p.y)<H*4) bodies.push({P,p,wp});
+  }
+  bodies.sort((a,b)=>b.p.d-a.p.d);
+  for(const b of bodies){
+    const rad=b.P.s*(H/900)*7;
+    drawGlow(spr.dot[b.P.n],b.p.x,b.p.y,rad*2.4,0.9*fade);
+    g.globalAlpha=fade;
+    g.fillStyle=`rgb(${b.P.c[0]},${b.P.c[1]},${b.P.c[2]})`;
+    g.beginPath(); g.arc(b.p.x,b.p.y,Math.max(1.2,b.P.s*0.9),0,TAU); g.fill();
+    g.globalAlpha=1;
+  }
+
+  const sunR=(H*0.012)+Math.pow(k,3.2)*(H*1.9);
+  const sp=proj([0,0,0],cam);
+  if(sp){
+    drawGlow(spr.halo,sp.x,sp.y,sunR*3.4,0.55);
+    drawGlow(spr.glowSun,sp.x,sp.y,sunR*1.35,1);
+    drawGlow(spr.core,sp.x,sp.y,sunR*0.42,1);
+  }
+  g.globalCompositeOperation="source-over";
+}
+
+function drawSunScene(simT,k){
+  const cam={yaw:0.10*state.clock+0.6, el:56*RAD, dist:5.6e6, fov:46*RAD};
+  g.globalCompositeOperation="source-over";
+  g.fillStyle="#05060A"; g.fillRect(0,0,W,H);
+  drawStars(cam);
+
+  const b=bary(simT);
+  const sun=[-b[0],-b[1],-b[2]];
+  const sp=proj(sun,cam), bp=proj([0,0,0],cam);
+  const fpx=(H/2)/Math.tan(cam.fov/2);
+  const sunR=Math.max(2,fpx*RS/(bp?bp.d:cam.dist));
+
+  g.globalCompositeOperation="lighter";
+  const trailN=170, span=24*365.25;
+  for(let i=trailN;i>0;i--){
+    const t0=simT-span*i/trailN, t1=simT-span*(i-1)/trailN;
+    const q0=bary(t0), q1=bary(t1);
+    const a0=proj([-q0[0],-q0[1],-q0[2]],cam), a1=proj([-q1[0],-q1[1],-q1[2]],cam);
+    if(!a0||!a1) continue;
+    const al=Math.pow(1-i/trailN,1.6)*0.5;
+    g.strokeStyle=`rgba(255,196,130,${al})`;
+    g.lineWidth=1.3;
+    g.beginPath(); g.moveTo(a0.x,a0.y); g.lineTo(a1.x,a1.y); g.stroke();
+  }
+
+  if(sp){
+    drawGlow(spr.halo,sp.x,sp.y,sunR*2.6,0.55);
+    drawGlow(spr.glowSun,sp.x,sp.y,sunR*1.18,1);
+    drawGlow(spr.core,sp.x,sp.y,sunR*0.55,1);
+    g.beginPath(); g.arc(sp.x,sp.y,sunR,0,TAU);
+    g.strokeStyle="rgba(255,215,160,0.35)"; g.lineWidth=1; g.stroke();
+  }
+
+  if(bp){
+    const pulse=0.5+0.5*Math.sin(performance.now()/700);
+    drawGlow(spr.mark,bp.x,bp.y,26+pulse*8,0.8);
+    g.strokeStyle="rgba(140,255,230,0.85)"; g.lineWidth=1.2;
+    g.beginPath();
+    g.moveTo(bp.x-13,bp.y); g.lineTo(bp.x-4,bp.y);
+    g.moveTo(bp.x+4,bp.y); g.lineTo(bp.x+13,bp.y);
+    g.moveTo(bp.x,bp.y-13); g.lineTo(bp.x,bp.y-4);
+    g.moveTo(bp.x,bp.y+4); g.lineTo(bp.x,bp.y+13);
+    g.stroke();
+    g.beginPath(); g.arc(bp.x,bp.y,2.4,0,TAU);
+    g.fillStyle="rgba(200,255,245,0.95)"; g.fill();
+  }
+  g.globalCompositeOperation="source-over";
+}
+
+function render(){
+  const s=shotAt(state.clock);
+  g.setTransform(DPR,0,0,DPR,0,0);
+  g.fillStyle="#05060A"; g.fillRect(0,0,W,H);
+
+  if(s.i<2) drawSystem(state.sim, s.i===0?0:s.k);
+  else drawSunScene(state.sim, s.k);
+
+  if(state.flash>0){
+    g.globalCompositeOperation="lighter";
+    g.fillStyle=`rgba(255,238,214,${state.flash*0.85})`;
+    g.fillRect(0,0,W,H);
+    g.globalCompositeOperation="source-over";
+  }
+
+  const vig=g.createRadialGradient(W/2,H/2,Math.min(W,H)*0.25,W/2,H/2,Math.max(W,H)*0.78);
+  vig.addColorStop(0,"rgba(0,0,0,0)"); vig.addColorStop(1,"rgba(0,0,0,0.55)");
+  g.fillStyle=vig; g.fillRect(0,0,W,H);
+
+  document.getElementById("cap").textContent=SHOTS[s.i].cap;
+  document.getElementById("date").textContent=fmt(state.sim);
+  const R=Rof(state.sim), dR=R-RS;
+  document.getElementById("dist").textContent =
+    dR>=0 ? "барицентр вне Солнца на "+num(dR)+" км"
+          : "барицентр внутри Солнца, до поверхности "+num(-dR)+" км";
+  document.getElementById("prog").style.width=(state.clock/TOTAL*100).toFixed(2)+"%";
+}
+
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if(state.playing){
+    const prev=state.clock;
+    state.clock+=dt;
+    if(state.clock>=TOTAL){
+      state.clock=0; initSim(); state.flash=0;
+    } else {
+      const s=shotAt(state.clock);
+      state.sim+=dt*SHOTS[s.i].rate*365.25;
+    }
+    if(prev<14.5 && state.clock>=14.5) state.flash=1;
+    state.flash=Math.max(0,state.flash-dt*4.5);
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener("resize",resize);
+window.addEventListener("keydown",e=>{
+  if(e.code==="Space"){e.preventDefault();state.playing=!state.playing;}
+  if(e.code==="KeyR"){state.clock=0;initSim();}
+});
+cv.addEventListener("click",()=>{state.playing=!state.playing;});
+
+resize();
+initSprites();
+setTimeout(()=>{const h=document.getElementById("hint");if(h)h.style.opacity="0";},5000);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

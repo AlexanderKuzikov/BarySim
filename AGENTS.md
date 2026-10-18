@@ -4,7 +4,8 @@
 
 - сборка данных: `python fetch.py && python build_data.py`
 - сборка страницы: `python build.py`
-- проверка: `node smoke.mjs`
+- сборка кино-версии: `python build_cinematic.py`
+- проверка: `node smoke.mjs`, `node smoke_cinematic.mjs`
 - статистика вкладов: `python analyze.py`
 - сверка модели с Horizons: `python compare.py` (нужен `horizons.txt`)
 
@@ -26,7 +27,10 @@
 - `build_data.py` — разбор `h1500.txt` в `hz.json` (плоский массив x,y,z).
 - `template.html` — шаблон страницы с плейсхолдером `{{DATA}}`.
 - `build.py` — подстановка `hz.json` в шаблон, результат `barycenter.html`.
-- `smoke.mjs` — headless-стенд: заглушки DOM и canvas, 16 проверок.
+- `template_cinematic.html` — шаблон кинематографической сцены, тот же `{{DATA}}`.
+- `build_cinematic.py` — сборка `cinematic.html`.
+- `smoke.mjs` — headless-стенд аналитической версии, 16 проверок.
+- `smoke_cinematic.mjs` — стенд кино-версии, 21 проверка (включая проекцию).
 - `analyze.py` — таблица вкладов планет и статистика 1800–2200.
 - `compare.py` — сверка кеплеровской модели с эталоном Horizons.
 
