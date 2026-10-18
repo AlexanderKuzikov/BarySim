@@ -108,13 +108,13 @@ canvas{display:block;width:100%}
       <span><i class="sw-blue"></i>Земля</span>
       <span><i class="sw-amber"></i>Юпитер · Сатурн · Уран · Нептун</span>
     </div>
-    <div class="cap">Расстояния сжаты логарифмом, углы сохранены. Солнце — иконка, не в масштабе: на такой карте его радиус уходит за край кадра.</div>
+    <div class="cap">Расстояния сжаты логарифмом, углы сохранены. Солнце — иконка, не в масштабе: на такой карте его радиус уходит за край кадра. Цвет и толщина ободка — величина смещения барицентра.</div>
   </section>
 
   <section class="panel">
     <h2>Солнце и барицентр <span>радиус кадра 2,5 млн км</span></h2>
     <canvas id="c2"></canvas>
-    <div class="cap">Перекрестие — барицентр, он неподвижен. Диск Солнца смещается относительно него; след — последние 30 лет.</div>
+    <div class="cap">Перекрестие — барицентр, он неподвижен. Диск Солнца смещается относительно него; след — последние 30 лет. Цвет диска — величина смещения: от бледного до красного, это кодировка, а не физика.</div>
   </section>
 </main>
 
@@ -164,19 +164,32 @@ const PER=[87.969,224.701,365.256,686.980,4332.59,10759.22,30688.5,60182];
 
 const PAL={
   light:{orbit:"rgba(0,0,0,.13)",earthOrbit:"rgba(55,138,221,.45)",label:"rgba(0,0,0,.42)",
-    sun:"#F7C873",sunEdge:"#C98A2A",sunRing:"#BA7517",mark:"#1D1D1B",markOut:"#A32D2D",
+    mark:"#1D1D1B",markOut:"#A32D2D",
     ring:"rgba(0,0,0,.06)",curve:"#1D1D1B",grid:"rgba(0,0,0,.07)",axis:"#8E8E88",
     band:"rgba(186,117,23,.07)",sunLine:"#BA7517",cursor:"#A32D2D",cursorRing:"rgba(163,45,45,.28)",
     trailRGB:"186,117,23",markText:"rgba(0,0,0,.5)",
     gray:"#8E8E88",blue:"#378ADD",amber:"#BA7517"},
   dark:{orbit:"rgba(255,255,255,.16)",earthOrbit:"rgba(107,168,238,.5)",label:"rgba(255,255,255,.5)",
-    sun:"#F7C873",sunEdge:"#E0A65A",sunRing:"#D89A3E",mark:"#ECECE8",markOut:"#E07070",
+    mark:"#ECECE8",markOut:"#E07070",
     ring:"rgba(255,255,255,.07)",curve:"#E8E8E2",grid:"rgba(255,255,255,.08)",axis:"#7C7C76",
     band:"rgba(216,154,62,.10)",sunLine:"#D89A3E",cursor:"#E07070",cursorRing:"rgba(224,112,112,.3)",
     trailRGB:"216,154,62",markText:"rgba(255,255,255,.5)",
     gray:"#9A9A94",blue:"#6BA8EE",amber:"#D89A3E"}
 };
 let TH=PAL.light;
+
+const SUN_STOPS=[[0,255,246,222],[0.25,253,228,175],[0.5,247,200,115],[0.75,235,160,80],[1,217,74,43]];
+function sunTint(t){
+  t=Math.max(0,Math.min(1,t));
+  let a=SUN_STOPS[0], b=SUN_STOPS[SUN_STOPS.length-1];
+  for(let i=0;i<SUN_STOPS.length-1;i++){
+    if(t>=SUN_STOPS[i][0]&&t<=SUN_STOPS[i+1][0]){a=SUN_STOPS[i];b=SUN_STOPS[i+1];break;}
+  }
+  const k=(t-a[0])/((b[0]-a[0])||1);
+  const r=Math.round(a[1]+(b[1]-a[1])*k), g=Math.round(a[2]+(b[2]-a[2])*k), bl=Math.round(a[3]+(b[3]-a[3])*k);
+  return {disc:"rgb("+r+","+g+","+bl+")", edge:"rgb("+Math.round(r*0.78)+","+Math.round(g*0.72)+","+Math.round(bl*0.55)+")"};
+}
+function sunShift(t){return Math.min(1,Rof(t)/1.5e6);}
 
 function planet(P,T){
   const a=P.a+P.da*T, e=P.e+P.de*T, I=(P.i+P.di*T)*RAD;
@@ -229,9 +242,9 @@ function drawSystem(){
     g1.stroke();
   }
 
-  const inside=Rof(state.t)<RS;
-  g1.beginPath(); g1.arc(0,0,11,0,7); g1.fillStyle=TH.sun; g1.fill();
-  g1.strokeStyle=inside?TH.sunEdge:TH.sunRing; g1.lineWidth=inside?1:2.4; g1.stroke();
+  const ts=sunShift(state.t), st=sunTint(ts);
+  g1.beginPath(); g1.arc(0,0,11,0,7); g1.fillStyle=st.disc; g1.fill();
+  g1.strokeStyle=st.edge; g1.lineWidth=1+1.5*ts; g1.stroke();
 
   const T=(state.t-2451545.0)/36525;
   const dps=state.speed*365.25;
@@ -282,11 +295,12 @@ function drawSun(){
     g2.fillStyle="rgba("+TH.trailRGB+","+(0.05+0.42*(1-s/steps))+")"; g2.fill();
   }
 
-  const rSun=RS*scale;
+  const rSun=RS*scale, ts=sunShift(state.t), st=sunTint(ts);
   g2.beginPath(); g2.arc(sx,sy,rSun,0,7);
-  g2.fillStyle=TH.sun; g2.fill();
-  g2.strokeStyle=TH.sunEdge; g2.lineWidth=1; g2.stroke();
-  g2.beginPath(); g2.arc(sx,sy,rSun*0.985,0,7); g2.strokeStyle="rgba(201,138,42,.35)"; g2.lineWidth=0.8; g2.stroke();
+  g2.fillStyle=st.disc; g2.fill();
+  g2.strokeStyle=st.edge; g2.lineWidth=1; g2.stroke();
+  g2.beginPath(); g2.arc(sx,sy,rSun*0.985,0,7);
+  g2.globalAlpha=0.35; g2.strokeStyle=st.edge; g2.lineWidth=0.8; g2.stroke(); g2.globalAlpha=1;
 
   const outside=Math.hypot(p[0],p[1])>RS;
   g2.strokeStyle=outside?TH.markOut:TH.mark; g2.lineWidth=1.2;

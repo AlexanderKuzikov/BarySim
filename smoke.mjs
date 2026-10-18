@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -196,6 +196,21 @@ ok('переключатель уводит в тёмную', de.getAttribute('d
 nodes.theme._l.click[0]();
 ok('переключатель возвращает светлую', de.getAttribute('data-theme') === 'light' && T.getTH() === T.PAL.light,
    'data-theme=' + de.getAttribute('data-theme'));
+
+const c0 = T.sunTint(0).disc, c1 = T.sunTint(1).disc;
+const rgb = s => s.match(/\d+/g).map(Number);
+ok('при нулевом смещении диск бледный', rgb(c0)[0] > 245 && rgb(c0)[2] > 200, c0);
+ok('при максимальном смещении диск красный', rgb(c1)[0] - rgb(c1)[1] > 100, c1);
+const mid = rgb(T.sunTint(0.5).disc);
+ok('середина шкалы — золото', Math.abs(mid[0] - 247) < 4 && Math.abs(mid[2] - 115) < 6, T.sunTint(0.5).disc);
+let mono = true;
+for (let i = 1; i <= 20; i++) {
+  const a = rgb(T.sunTint((i - 1) / 20).disc), b = rgb(T.sunTint(i / 20).disc);
+  if (b[2] > a[2] + 0.5) mono = false;
+}
+ok('шкала монотонна по синему', mono, 'проверено 20 шагов');
+ok('sunShift нормирует на 1.5 млн', Math.abs(T.sunShift(T.jd(1804,4,19)) - 1466025/1.5e6) < 0.01,
+   T.sunShift(T.jd(1804,4,19)).toFixed(3));
 
 console.log('\nпроверок: ' + checks + ', провалов: ' + fails);
 process.exit(fails ? 1 : 0);
