@@ -34,13 +34,14 @@ body{background:var(--bg);color:var(--t1);font:14px/1.5 -apple-system,"Segoe UI"
 header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px;flex:0 0 auto}
 h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
 .sub{font-size:12px;color:var(--t3);margin-top:2px}
-.clock{margin-left:auto;text-align:right;line-height:1.35}
-.clock .d{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
-.clock .v{font-size:12px;color:var(--t2);font-variant-numeric:tabular-nums}
+
+
+
 .side{display:flex;flex-direction:column;gap:12px;padding:13px 14px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field>label{font-size:10.5px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
 .field b{font-size:12px;font-weight:500;color:var(--t2)}
+.field .v{font-size:11.5px;color:var(--t2);font-variant-numeric:tabular-nums;line-height:1.35}
 button{font:inherit;font-size:13px;padding:6px 14px;border:.5px solid var(--line);background:var(--panel);border-radius:8px;cursor:pointer;color:var(--t1)}
 button:hover{background:var(--hover)}
 button.on{background:var(--ink);color:var(--onink);border-color:var(--ink)}
@@ -48,7 +49,7 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .chips{display:flex;flex-direction:column;gap:5px}
 .chips button{padding:5px 10px;font-size:12px;color:var(--t2);text-align:left}
 .chips button.on{color:var(--onink)}
-#jump{width:100%;font:inherit;font-size:12px;padding:5px 7px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
+#jump{width:100%;font:inherit;font-size:19px;font-weight:500;padding:7px 6px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
 #jump:focus{outline:none;border-color:var(--ink)}
 #jump.bad{border-color:var(--red);color:var(--red)}
 #c3{cursor:ew-resize}
@@ -96,7 +97,6 @@ canvas{display:block;width:100%}
 @media (max-width:900px){
   main{grid-template-columns:1fr;justify-content:stretch}
   .side{order:-1}
-  .clock{margin-left:0;text-align:left}
 }
 </style>
 </head>
@@ -106,11 +106,6 @@ canvas{display:block;width:100%}
   <div>
     <h1>Барицентр Солнечной системы</h1>
     <div class="sub">Эфемериды JPL DE441, шаг 120 суток, 20 000 лет · <button class="linkbtn" id="about">как это читать</button></div>
-  </div>
-  <div class="clock">
-    <div class="d" id="date">—</div>
-    <div class="v" id="dist">—</div>
-    <div class="v" id="surf">—</div>
   </div>
 </header>
 
@@ -142,6 +137,8 @@ canvas{display:block;width:100%}
     <div class="field">
       <label for="jump">Дата</label>
       <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804">
+      <div class="v" id="dist">—</div>
+      <div class="v" id="surf">—</div>
     </div>
     <div class="field">
       <label>Окно</label>
@@ -487,7 +484,6 @@ function drawChart(){
 
 function readout(){
   const p=at(state.t), R=Math.hypot(p[0],p[1],p[2]);
-  document.getElementById("date").textContent=fmt(state.t);
   document.getElementById("dist").textContent=num(R)+" км от центра Солнца";
   syncJump();
   const s=R-RS;
@@ -566,7 +562,7 @@ function parseIn(raw){
 }
 function syncJump(){
   if(document.activeElement===jump) return;
-  const s=fmtIn(state.t);
+  const s=fmt(state.t);
   if(jump.value!==s) jump.value=s;
 }
 function setWindow(a,b){
@@ -592,12 +588,14 @@ function applyJump(){
   const v=parseIn(jump.value);
   if(v===null||v<T0||v>T0+(N-1)*ST){
     jump.classList.add("bad");
-    setTimeout(()=>{jump.classList.remove("bad");syncJump();},700);
+    setTimeout(()=>{jump.classList.remove("bad");jump.value=fmt(state.t);},700);
     return;
   }
   setPlaying(false);
   setDate(v);
+  jump.value=fmt(state.t);
 }
+jump.addEventListener("focus",()=>{jump.value=fmtIn(state.t);jump.select();});
 jump.addEventListener("keydown",e=>{if(e.key==="Enter"){applyJump();jump.blur();}});
 jump.addEventListener("blur",applyJump);
 

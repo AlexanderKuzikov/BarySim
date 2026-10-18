@@ -38,7 +38,7 @@ function el(id, parent) {
       contains(c) { return this._s.has(c); }
     },
     addEventListener(t, f) { (this._l[t] = this._l[t] || []).push(f); },
-    focus() {},
+    focus() {}, select() {},
     getContext() { return ctxStub(); },
     getBoundingClientRect() { return { left: 0, top: 0, width: 900, height: 190 }; },
     closest(sel) { return this.dataset && this.dataset.a ? this : null; },
@@ -55,7 +55,7 @@ const panels = {
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
-['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about','wrap3'].forEach(id => {
+['dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about','wrap3'].forEach(id => {
   nodes[id] = el(id, panels[id] || null);
 });
 nodes.speed.value = '3';
@@ -232,6 +232,12 @@ ok('Escape закрывает окно', nodes.modal.hidden === true, 'hidden=' 
 nodes.about._l.click[0]();
 nodes.mbg._l.click[0]();
 ok('клик по фону закрывает', nodes.modal.hidden === true, 'hidden=' + nodes.modal.hidden);
+
+nodes.jump.value = '01.01.1000';
+T.applyJump();
+ok('после ввода поле показывает человеческую дату', nodes.jump.value === T.fmt(T.state.t), nodes.jump.value);
+nodes.jump._l.focus[0]();
+ok('при фокусе поле переходит в цифровой вид', nodes.jump.value === T.fmtIn(T.state.t), nodes.jump.value);
 
 const [w1,h1,w2,h2,w3,h3] = T.getSizes();
 ok('сцены квадратные', w1 === h1 && w2 === h2 && w1 > 200, w1 + '×' + h1);
