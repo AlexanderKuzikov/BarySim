@@ -29,23 +29,26 @@
   --ink:#ECECE8; --onink:#12130F; --hover:#202126;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--t1);font:14px/1.5 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;padding:20px 22px 28px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px;margin-bottom:16px}
+body{background:var(--bg);color:var(--t1);font:14px/1.5 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.app{max-width:1560px;margin:0 auto;padding:14px 18px 16px;min-height:100vh;display:flex;flex-direction:column;gap:12px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px;flex:0 0 auto}
 h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
 .sub{font-size:12px;color:var(--t3);margin-top:2px}
 .clock{margin-left:auto;text-align:right;line-height:1.35}
 .clock .d{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
 .clock .v{font-size:12px;color:var(--t2);font-variant-numeric:tabular-nums}
-.controls{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:14px;padding:10px 14px;background:var(--panel);border:.5px solid var(--line);border-radius:12px}
+.side{display:flex;flex-direction:column;gap:12px;padding:13px 14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field>label{font-size:10.5px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
+.field b{font-size:12px;font-weight:500;color:var(--t2)}
 button{font:inherit;font-size:13px;padding:6px 14px;border:.5px solid var(--line);background:var(--panel);border-radius:8px;cursor:pointer;color:var(--t1)}
 button:hover{background:var(--hover)}
 button.on{background:var(--ink);color:var(--onink);border-color:var(--ink)}
-label.sp{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
-input[type=range]{width:130px;accent-color:var(--ink)}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
-.chips button{padding:5px 10px;font-size:12px;color:var(--t2)}
+input[type=range]{width:100%;accent-color:var(--ink)}
+.chips{display:flex;flex-direction:column;gap:5px}
+.chips button{padding:5px 10px;font-size:12px;color:var(--t2);text-align:left}
 .chips button.on{color:var(--onink)}
-#jump{width:132px;font:inherit;font-size:12px;padding:5px 7px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
+#jump{width:100%;font:inherit;font-size:12px;padding:5px 7px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
 #jump:focus{outline:none;border-color:var(--ink)}
 #jump.bad{border-color:var(--red);color:var(--red)}
 #c3{cursor:ew-resize}
@@ -58,7 +61,7 @@ input[type=range]{width:130px;accent-color:var(--ink)}
   :root:not([data-theme="light"]) .sw-blue{background:#6BA8EE}
   :root:not([data-theme="light"]) .sw-amber{background:#D89A3E}
 }
-#theme{margin-left:10px}
+#theme{margin-top:auto}
 .linkbtn{background:none;border:none;padding:0;font:inherit;font-size:12px;color:var(--t3);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .linkbtn:hover{background:none;color:var(--t1)}
 .modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:22px}
@@ -79,7 +82,7 @@ input[type=range]{width:130px;accent-color:var(--ink)}
 .stat span{display:block;font-size:11px;color:var(--t3);margin-top:3px;line-height:1.35}
 .foot{font-size:11px;color:var(--t3);margin-top:20px;text-align:right}
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.modal-card{padding:26px 20px 22px}}
-main{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+main{display:grid;grid-template-columns:auto auto 300px;gap:12px;justify-content:center;align-items:stretch;flex:0 0 auto}
 .panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:12px 14px 10px;min-width:0}
 .panel h2{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
 .panel h2 span{font-weight:400;color:var(--t3);font-size:11px}
@@ -89,10 +92,16 @@ canvas{display:block;width:100%}
 .legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
 #wrap3{margin-bottom:4px}
 .sel{position:absolute;background:rgba(186,117,23,.12);border-left:1px solid var(--amber);border-right:1px solid var(--amber);pointer-events:none;display:none}
-@media (max-width:900px){main{grid-template-columns:1fr}.clock{margin-left:0;text-align:left}}
+#wrap3{flex:0 0 auto}
+@media (max-width:900px){
+  main{grid-template-columns:1fr;justify-content:stretch}
+  .side{order:-1}
+  .clock{margin-left:0;text-align:left}
+}
 </style>
 </head>
 <body>
+<div class="app">
 <header>
   <div>
     <h1>Барицентр Солнечной системы</h1>
@@ -105,38 +114,48 @@ canvas{display:block;width:100%}
   </div>
 </header>
 
-<div class="controls">
-  <button id="play" class="on">Пауза</button>
-  <label class="sp">Темп <input type="range" id="speed" min="0.5" max="12" step="0.5" value="3"><b id="speedv" style="font-weight:500;width:74px;display:inline-block">3 года/с</b></label>
-  <label class="sp">Дата <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804"></label>
-  <div class="chips" id="chips">
-    <button data-a="-9998" data-b="9999">весь ряд</button>
-    <button data-a="-3000" data-b="1">−3000…1</button>
-    <button data-a="1" data-b="2000">1–2000</button>
-    <button data-a="1500" data-b="2500">1500–2500</button>
-    <button data-a="1800" data-b="2200" class="on">1800–2200</button>
-    <button data-a="1960" data-b="2040">1960–2040</button>
-  </div>
-  <button id="theme">Тёмная</button>
-</div>
-
 <main>
   <section class="panel">
-    <h2>Солнечная система <span>радиальный масштаб логарифмический</span></h2>
+    <h2>Солнечная система <span>лог. масштаб</span></h2>
     <canvas id="c1"></canvas>
     <div class="legend">
       <span><i class="sw-gray"></i>Меркурий · Венера · Марс</span>
       <span><i class="sw-blue"></i>Земля</span>
       <span><i class="sw-amber"></i>Юпитер · Сатурн · Уран · Нептун</span>
     </div>
-    <div class="cap">Расстояния сжаты логарифмом, углы сохранены. Солнце — иконка, не в масштабе: на такой карте его радиус уходит за край кадра. Цвет и толщина ободка — величина смещения барицентра.</div>
+    <div class="cap">Расстояния сжаты логарифмом, углы сохранены. Солнце — иконка, не в масштабе. Цвет и толщина ободка — величина смещения.</div>
   </section>
 
   <section class="panel">
-    <h2>Солнце и барицентр <span>радиус кадра 2,5 млн км</span></h2>
+    <h2>Солнце и барицентр <span>2,5 млн км</span></h2>
     <canvas id="c2"></canvas>
-    <div class="cap">Перекрестие — барицентр, он неподвижен. Диск Солнца смещается относительно него; след — последние 30 лет. Цвет диска кодирует величину смещения: от бледного до красного.</div>
+    <div class="cap">Перекрестие — барицентр, он неподвижен. Диск Солнца смещается относительно него; след — последние 30 лет. Цвет кодирует смещение.</div>
   </section>
+
+  <aside class="panel side">
+    <button id="play" class="on">Пауза</button>
+    <div class="field">
+      <label for="speed">Темп</label>
+      <input type="range" id="speed" min="0.5" max="12" step="0.5" value="3">
+      <b id="speedv">3 года/с</b>
+    </div>
+    <div class="field">
+      <label for="jump">Дата</label>
+      <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804">
+    </div>
+    <div class="field">
+      <label>Окно</label>
+      <div class="chips" id="chips">
+        <button data-a="-9998" data-b="9999">весь ряд</button>
+        <button data-a="-3000" data-b="1">−3000…1</button>
+        <button data-a="1" data-b="2000">1–2000</button>
+        <button data-a="1500" data-b="2500">1500–2500</button>
+        <button data-a="1800" data-b="2200" class="on">1800–2200</button>
+        <button data-a="1960" data-b="2040">1960–2040</button>
+      </div>
+    </div>
+    <button id="theme">Тёмная</button>
+  </aside>
 </main>
 
 <section class="panel" id="wrap3">
@@ -144,6 +163,7 @@ canvas{display:block;width:100%}
   <div style="position:relative"><canvas id="c3"></canvas><div class="sel" id="sel"></div></div>
   <div class="cap">Горизонталь — фотосфера, 695 700 км. Ниже неё барицентр внутри Солнца. Тяните по графику, чтобы менять дату; Shift + протяжка — выбрать окно.</div>
 </section>
+</div>
 
 <div class="modal" id="modal" hidden>
   <div class="modal-bg" id="mbg"></div>
@@ -280,9 +300,18 @@ const g1=c1.getContext("2d"), g2=c2.getContext("2d"), g3=c3.getContext("2d");
 let W1=0,H1=0,W2=0,H2=0,W3=0,H3=0;
 let chartBuf=null;
 
-function fit(cv,ctx,h){
-  const dpr=Math.min(window.devicePixelRatio||1,2), w=cv.parentElement.clientWidth-(cv.parentElement.classList.contains("panel")?28:0);
-  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); cv.style.height=h+"px";
+function fitSq(cv,ctx,size){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(size*dpr); cv.height=Math.round(size*dpr);
+  cv.style.width=size+"px"; cv.style.height=size+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return [size,size];
+}
+function fitW(cv,ctx,h){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const w=cv.parentElement.clientWidth;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  cv.style.width=w+"px"; cv.style.height=h+"px";
   ctx.setTransform(dpr,0,0,dpr,0,0);
   return [w,h];
 }
@@ -478,10 +507,29 @@ function loop(now){
   requestAnimationFrame(loop);
 }
 
+function chromeOf(cv){
+  const old=cv.style.height;
+  cv.style.height="0px";
+  const h=cv.parentElement.offsetHeight;
+  cv.style.height=old;
+  return h;
+}
 function resize(){
-  [W1,H1]=fit(c1,g1,Math.max(300,Math.min(420,window.innerWidth*0.33)));
-  [W2,H2]=fit(c2,g2,H1);
-  [W3,H3]=fit(c3,g3,190);
+  [W3,H3]=fitW(c3,g3,165);
+  const hdr=document.querySelector("header").offsetHeight;
+  const chartP=document.getElementById("wrap3").offsetHeight;
+  const innerW=Math.min(window.innerWidth,1560)-46;
+  const availH=window.innerHeight-30-hdr-24-chartP;
+  const narrow=window.innerWidth<900;
+  const colW=narrow?(innerW-26):(innerW-300-24-52)/2;
+  let S=Math.max(200,narrow?colW:Math.min(colW,availH-120));
+  for(let k=0;k<2;k++){
+    c1.style.width=S+"px"; c2.style.width=S+"px";
+    const chrome=Math.max(chromeOf(c1),chromeOf(c2));
+    S=Math.max(200,Math.round(Math.min(colW,availH-chrome)));
+  }
+  [W1,H1]=fitSq(c1,g1,S);
+  [W2,H2]=fitSq(c2,g2,S);
   buildChart();
 }
 window.addEventListener("resize",resize);

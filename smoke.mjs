@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,fmt,openModal,closeModal};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,fmt,openModal,closeModal,resize,getSizes:()=>[W1,H1,W2,H2,W3,H3]};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -48,15 +48,18 @@ function el(id, parent) {
 }
 
 const panels = {
-  c1: { clientWidth: 620, classList: { contains: c => c === 'panel' } },
-  c2: { clientWidth: 620, classList: { contains: c => c === 'panel' } },
+  c1: { clientWidth: 620, classList: { contains: c => c === 'panel' },
+        get offsetHeight() { return 104 + (parseInt(nodes.c1.style.height) || 0); } },
+  c2: { clientWidth: 620, classList: { contains: c => c === 'panel' },
+        get offsetHeight() { return 96 + (parseInt(nodes.c2.style.height) || 0); } },
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
-['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about'].forEach(id => {
+['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about','wrap3'].forEach(id => {
   nodes[id] = el(id, panels[id] || null);
 });
 nodes.speed.value = '3';
+nodes.wrap3.offsetHeight = 240;
 nodes.modal.hidden = true;
 const chipBtns = ['1500','1600','1800','1900','1960'].map((a, i) => {
   const b = el('chip' + i, null);
@@ -74,6 +77,7 @@ const sandbox = {
     getElementById: id => nodes[id],
     createElement: tag => el('tmp', null),
     querySelectorAll: () => [],
+    querySelector: () => ({ offsetHeight: 56 }),
     activeElement: null,
     addEventListener(t, f) { (docL[t] = docL[t] || []).push(f); },
     documentElement: { _a:{}, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }
@@ -228,6 +232,23 @@ ok('Escape закрывает окно', nodes.modal.hidden === true, 'hidden=' 
 nodes.about._l.click[0]();
 nodes.mbg._l.click[0]();
 ok('клик по фону закрывает', nodes.modal.hidden === true, 'hidden=' + nodes.modal.hidden);
+
+const [w1,h1,w2,h2,w3,h3] = T.getSizes();
+ok('сцены квадратные', w1 === h1 && w2 === h2 && w1 > 200, w1 + '×' + h1);
+ok('сцены одинаковые', w1 === w2, w1 + ' / ' + w2);
+const fits = h => 30 + 56 + 12 + h + 96 + 12 + 240 <= h * 0 + 900;
+ok('на 1440×900 влезает по вертикали', 30 + 56 + 12 + h1 + 104 + 12 + 240 <= 900,
+   (30 + 56 + 12 + h1 + 104 + 12 + 240) + ' px из 900');
+
+sandbox.window.innerWidth = 1920; sandbox.window.innerHeight = 1080;
+T.resize();
+const [fw] = T.getSizes();
+ok('на 1920×1080 влезает по вертикали', 30 + 56 + 12 + fw + 104 + 12 + 240 <= 1080,
+   fw + ' px сцена, итого ' + (30 + 56 + 12 + fw + 104 + 12 + 240) + ' из 1080');
+ok('на FullHD сцена крупнее', fw > w1, fw + ' > ' + w1);
+ok('на FullHD влезает по ширине', 2*(fw+26)+300+24 <= 1524, (2*(fw+26)+300+24) + ' из 1524');
+sandbox.window.innerWidth = 1440; sandbox.window.innerHeight = 900;
+T.resize();
 
 console.log('\nпроверок: ' + checks + ', провалов: ' + fails);
 process.exit(fails ? 1 : 0);
