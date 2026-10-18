@@ -101,7 +101,11 @@ canvas{display:block;margin:0 auto;flex:0 0 auto}
 #wrap3{flex:0 0 auto}
 @media (max-width:1080px){
   main{grid-template-columns:1fr;justify-content:stretch}
-  .side{order:-1;max-height:none!important;overflow:visible}
+  .side{order:-1;max-height:none!important;overflow:visible;flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:14px}
+  .side>button{flex:0 0 auto}
+  .side .field{flex:1 1 170px}
+  .side .chips{flex-direction:row;flex-wrap:wrap}
+  .side .chips button{flex:1 1 auto;text-align:center}
   header{justify-content:flex-start}
   .datebox{align-items:flex-start}
   .nums{flex-wrap:wrap}
