@@ -48,10 +48,16 @@ function el(id, parent) {
 }
 
 const panels = {
-  c1: { clientWidth: 620, classList: { contains: c => c === 'panel' },
-        get offsetHeight() { return 104 + (parseInt(nodes.c1.style.height) || 0); } },
-  c2: { clientWidth: 620, classList: { contains: c => c === 'panel' },
-        get offsetHeight() { return 96 + (parseInt(nodes.c2.style.height) || 0); } },
+  c1: { clientWidth: 620, style: {}, classList: { contains: c => c === 'panel' },
+        get offsetHeight() {
+          const c = 104 + (parseInt(nodes.c1.style.height) || 0);
+          return this.style.alignSelf === 'start' ? c : Math.max(c, 480);
+        } },
+  c2: { clientWidth: 620, style: {}, classList: { contains: c => c === 'panel' },
+        get offsetHeight() {
+          const c = 96 + (parseInt(nodes.c2.style.height) || 0);
+          return this.style.alignSelf === 'start' ? c : Math.max(c, 480);
+        } },
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
@@ -77,7 +83,7 @@ const sandbox = {
     getElementById: id => nodes[id],
     createElement: tag => el('tmp', null),
     querySelectorAll: () => [],
-    querySelector: () => ({ offsetHeight: 56 }),
+    querySelector: sel => sel === 'header' ? { offsetHeight: 56 } : { offsetHeight: 240, style: {} },
     activeElement: null,
     addEventListener(t, f) { (docL[t] = docL[t] || []).push(f); },
     documentElement: { _a:{}, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }

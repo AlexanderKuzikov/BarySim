@@ -40,7 +40,7 @@ h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
 
 
 
-.side{display:flex;flex-direction:column;gap:12px;padding:13px 14px}
+.side{display:flex;flex-direction:column;gap:12px;padding:13px 14px;overflow-y:auto;overflow-x:hidden}
 .field{display:flex;flex-direction:column;gap:5px}
 .field>label{font-size:10.5px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
 .field b{font-size:12px;font-weight:500;color:var(--t2)}
@@ -86,7 +86,7 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .stat span{display:block;font-size:11px;color:var(--t3);margin-top:3px;line-height:1.35}
 .foot{font-size:11px;color:var(--t3);margin-top:20px;text-align:right}
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.modal-card{padding:26px 20px 22px}}
-main{display:grid;grid-template-columns:auto auto 300px;gap:12px;justify-content:center;align-items:stretch;flex:0 0 auto}
+main{display:grid;grid-template-columns:auto auto 300px;gap:12px;justify-content:center;align-items:start;flex:0 0 auto}
 .panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:12px 14px 10px;min-width:0}
 .panel h2{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
 .panel h2 span{font-weight:400;color:var(--t3);font-size:11px}
@@ -514,10 +514,12 @@ function loop(now){
 }
 
 function chromeOf(cv){
-  const old=cv.style.height;
+  const panel=cv.parentElement, oldH=cv.style.height, oldA=panel.style.alignSelf;
+  panel.style.alignSelf="start";
   cv.style.height="0px";
-  const h=cv.parentElement.offsetHeight;
-  cv.style.height=old;
+  const h=panel.offsetHeight;
+  cv.style.height=oldH;
+  panel.style.alignSelf=oldA;
   return h;
 }
 function resize(){
@@ -525,17 +527,19 @@ function resize(){
   const hdr=document.querySelector("header").offsetHeight;
   const chartP=document.getElementById("wrap3").offsetHeight;
   const innerW=Math.min(window.innerWidth,1560)-46;
-  const availH=window.innerHeight-30-hdr-24-chartP;
+  const availH=Math.max(260,window.innerHeight-30-hdr-24-chartP-4);
   const narrow=window.innerWidth<900;
   const colW=narrow?(innerW-26):(innerW-300-24-52)/2;
-  let S=Math.max(200,narrow?colW:Math.min(colW,availH-120));
+  let S=Math.max(180,narrow?colW:Math.min(colW,availH-140));
   for(let k=0;k<2;k++){
     c1.style.width=S+"px"; c2.style.width=S+"px";
     const chrome=Math.max(chromeOf(c1),chromeOf(c2));
-    S=Math.max(200,Math.round(Math.min(colW,availH-chrome)));
+    S=Math.max(180,Math.round(Math.min(colW,availH-chrome)));
   }
   [W1,H1]=fitSq(c1,g1,S);
   [W2,H2]=fitSq(c2,g2,S);
+  const side=document.querySelector(".side");
+  if(side) side.style.maxHeight=availH+"px";
   buildChart();
 }
 window.addEventListener("resize",resize);
