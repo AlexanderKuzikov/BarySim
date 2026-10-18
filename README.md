@@ -1,0 +1,54 @@
+<p align="center">
+  <img alt="HTML5" src="https://img.shields.io/badge/HTML5-Canvas-E34F26?logo=html5&logoColor=white">
+  <img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-ES2020-F7DF1E?logo=javascript&logoColor=black">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white">
+  <img alt="Data" src="https://img.shields.io/badge/Ephemeris-JPL_DE441-1D9E75">
+</p>
+
+<h1 align="center">BarySim</h1>
+<p align="center">Солнце, Земля и точка, вокруг которой они на самом деле движутся</p>
+
+---
+
+Барицентр Солнечной системы лежит в среднем в 830 тыс. км от центра Солнца — за
+фотосферой, радиус которой 696 тыс. км. Проект показывает это в движении:
+три ракурса с общим курсором времени, окно 1500–2500, эфемериды JPL DE441.
+
+- **Три ракурса** — лог-карта орбит, смещение Солнца относительно барицентра,
+  график расстояния с двумя шкалами.
+- **Вклад планет** — Юпитер даёт 742 тыс. км, Земля — 449 км, разница в 1650 раз.
+- **Регулируемый темп** — от 0,5 до 12 лет в секунду, быстрые планеты
+  смазываются в кольца.
+- **Произвольное окно** — пресеты и выделение мышью прямо по графику.
+- **Без зависимостей** — один HTML-файл, canvas 2D, данные внутри.
+
+## Быстрый старт
+
+```bash
+git clone https://github.com/AlexanderKuzikov/BarySim.git
+cd BarySim
+start barycenter.html
+```
+
+Пересборка из эфемерид:
+
+```bash
+python fetch.py        # скачать h1500.txt с JPL Horizons
+python build_data.py   # разобрать в hz.json
+python build.py        # вставить данные в barycenter.html
+node smoke.mjs         # 16 проверок в headless-стенде
+```
+
+## Документация
+
+- [`docs/CONTEXT.md`](docs/CONTEXT.md) — состояние проекта и открытые вопросы
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — архитектурные решения
+
+## Статус
+
+**v0.1.0** — работающий прототип: три ракурса, 36 524 точки, 1500–2500.
+Визуальная проверка скриншотом не проводилась.
+
+## Лицензия
+
+Не выбрана.

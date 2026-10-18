@@ -1,0 +1,8 @@
+h1500.txt
+horizons.txt
+__pycache__/
+*.pyc
+.chrome-tmp/
+.etmp/
+shot*.png
+check.js
