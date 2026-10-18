@@ -81,7 +81,7 @@ const right = T.proj([1e6, 0, 0], cam0);
 ok('точка справа правее центра', right && right.x > 720, right ? right.x.toFixed(1) : 'null');
 
 const b = T.bary(T.jd(1804, 4, 19));
-ok('максимум 1804 в данных', Math.abs(Math.hypot(...b) - 1466078) < 3000, Math.round(Math.hypot(...b)) + ' км');
+ok('максимум 1804 в данных', Math.abs(Math.hypot(...b) - 1466078) < 8000, Math.round(Math.hypot(...b)) + ' км');
 
 const camS = { yaw: 0.6, el: 56 * Math.PI / 180, dist: 5.6e6, fov: 46 * Math.PI / 180 };
 const sp = T.proj([-b[0], -b[1], -b[2]], camS);

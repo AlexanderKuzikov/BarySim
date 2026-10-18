@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,openModal,closeModal};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,fmt,openModal,closeModal};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -119,9 +119,9 @@ for (let i = 0; i < T.N; i++) {
   if (T.Rv[i] > mx) { mx = T.Rv[i]; imx = i; }
   if (T.Rv[i] < mn) { mn = T.Rv[i]; imn = i; }
 }
-ok('максимум |R| совпадает с расчётом', Math.abs(mx - 1547644) < 2000, mx.toFixed(0) + ' км');
-ok('минимум |R| совпадает с расчётом', Math.abs(mn - 6648) < 2000, mn.toFixed(0) + ' км');
-ok('точек столько же', T.N === 36525, String(T.N));
+ok('максимум |R| совпадает с расчётом', Math.abs(mx - 1547601) < 2000, mx.toFixed(0) + ' км');
+ok('минимум |R| совпадает с расчётом', Math.abs(mn - 11494) < 2000, mn.toFixed(0) + ' км');
+ok('точек столько же', T.N === 60868, String(T.N));
 
 const d = T.at(2461331.5);
 const R = Math.hypot(d[0], d[1], d[2]);
@@ -173,6 +173,9 @@ ok('разбор даты 19.04.1804', T.fmtIn(T.parseIn('19.04.1804')) === '19.
 ok('разбор только года', T.fmtIn(T.parseIn('1804')) === '01.01.1804', T.fmtIn(T.parseIn('1804')));
 ok('разбор ISO', T.fmtIn(T.parseIn('1804-04-19')) === '19.04.1804', T.fmtIn(T.parseIn('1804-04-19')));
 ok('мусор отвергается', T.parseIn('вчера') === null, String(T.parseIn('вчера')));
+ok('дата до н. э. разбирается', T.fmtIn(T.parseIn('05.07.3322 до н. э.')) === '05.07.3322 до н. э.', T.fmtIn(T.parseIn('05.07.3322 до н. э.')));
+ok('отрицательный год разбирается', Math.abs(T.parseIn('-3321') - T.jd(-3321,1,1)) < 0.001, T.fmtIn(T.parseIn('-3321')));
+ok('эра в подписи', T.fmt(T.jd(-3321,7,5)).includes('до н. э.'), T.fmt(T.jd(-3321,7,5)));
 
 T.setWindow(T.T0 + 400 * 365.25, T.T0 + 450 * 365.25);
 nodes.jump.value = '12.03.1600';

@@ -45,7 +45,7 @@ input[type=range]{width:130px;accent-color:var(--ink)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 .chips button{padding:5px 10px;font-size:12px;color:var(--t2)}
 .chips button.on{color:var(--onink)}
-#jump{width:100px;font:inherit;font-size:12px;padding:5px 7px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
+#jump{width:132px;font:inherit;font-size:12px;padding:5px 7px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
 #jump:focus{outline:none;border-color:var(--ink)}
 #jump.bad{border-color:var(--red);color:var(--red)}
 #c3{cursor:ew-resize}
@@ -96,7 +96,7 @@ canvas{display:block;width:100%}
 <header>
   <div>
     <h1>Барицентр Солнечной системы</h1>
-    <div class="sub">Эфемериды JPL DE441, шаг 40 суток, 1–4000 · <button class="linkbtn" id="about">как это читать</button></div>
+    <div class="sub">Эфемериды JPL DE441, шаг 120 суток, 20 000 лет · <button class="linkbtn" id="about">как это читать</button></div>
   </div>
   <div class="clock">
     <div class="d" id="date">—</div>
@@ -110,8 +110,9 @@ canvas{display:block;width:100%}
   <label class="sp">Темп <input type="range" id="speed" min="0.5" max="12" step="0.5" value="3"><b id="speedv" style="font-weight:500;width:74px;display:inline-block">3 года/с</b></label>
   <label class="sp">Дата <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804"></label>
   <div class="chips" id="chips">
-    <button data-a="1" data-b="4000">весь ряд</button>
-    <button data-a="1000" data-b="2000">1000–2000</button>
+    <button data-a="-9998" data-b="9999">весь ряд</button>
+    <button data-a="-3000" data-b="1">−3000…1</button>
+    <button data-a="1" data-b="2000">1–2000</button>
     <button data-a="1500" data-b="2500">1500–2500</button>
     <button data-a="1800" data-b="2200" class="on">1800–2200</button>
     <button data-a="1960" data-b="2040">1960–2040</button>
@@ -173,17 +174,17 @@ canvas{display:block;width:100%}
     <div class="stats">
       <div class="stat"><b>742 000</b><span>км даёт Юпитер</span></div>
       <div class="stat"><b>407 000</b><span>км даёт Сатурн</span></div>
-      <div class="stat"><b>1 547 644</b><span>км максимум, 1306 год</span></div>
+      <div class="stat"><b>1 547 601</b><span>км максимум, 3322 до н. э.</span></div>
       <div class="stat"><b>65 %</b><span>времени вне фотосферы</span></div>
     </div>
 
     <h3>Что вокруг чего</h3>
     <p>У системы есть общий центр масс — барицентр. В системе отсчёта, связанной с ним, движутся все тела: Солнце, планеты, их спутники. Он не притягивает: это точка равновесия масс, а не источник гравитации.</p>
-    <p>В этой системе отсчёта траектории планет замкнуты вокруг барицентра. Удерживает их Солнце: фокус каждой планетной орбиты лежит в центре звезды с точностью до долей процента. Само Солнце обращается вокруг барицентра, и его смещение задают тяжёлые планеты — в среднем точка удалена от центра звезды на 826 тыс. км, максимум на 1,55 млн.</p>
+    <p>В этой системе отсчёта траектории планет замкнуты вокруг барицентра. Удерживает их Солнце: фокус каждой планетной орбиты лежит в центре звезды с точностью до долей процента. Само Солнце обращается вокруг барицентра, и его смещение задают тяжёлые планеты — в среднем точка удалена от центра звезды на 827 тыс. км, максимум на 1,55 млн.</p>
     <p class="muted">Геометрическая и динамическая картины описывают одно движение: первая отвечает, вокруг какой точки замкнуты траектории, вторая — что удерживает планеты на орбитах.</p>
 
     <h3>Откуда числа</h3>
-    <p>Положение барицентра — JPL Horizons, эфемериды DE441, шаг 40 суток, 1–4000, 36 526 точек. Планеты в первом ракурсе считаются по кеплеровским элементам: там важна угловая позиция, а не расстояние.</p>
+    <p>Положение барицентра — JPL Horizons, эфемериды DE441, шаг 120 суток, 9999 до н. э. — 9999, 60 868 точек. Планеты в первом ракурсе считаются по кеплеровским элементам: там важна угловая позиция, а не расстояние.</p>
     <div class="foot">Esc — закрыть</div>
   </div>
 </div>
@@ -217,7 +218,8 @@ function jd(y,m,d){
   if(orig>=15821015){const A=Math.floor(y/100);B=2-A+Math.floor(A/4);}
   return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;
 }
-function fmt(j){const o=jdToDate(j);return o.d+" "+MON[o.m-1]+" "+o.y;}
+function era(y){return y>0?String(y):(1-y)+" до н. э.";}
+function fmt(j){const o=jdToDate(j);return o.d+" "+MON[o.m-1]+" "+era(o.y);}
 function num(v){return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g," ");}
 
 const PL=[
@@ -437,6 +439,7 @@ function buildChart(){
     if(t>state.wb) break;
     g.fillText(y, X(t), h-7);
   }
+  if(jdToDate(state.wa).y<=0){g.fillStyle=TH.axis;g.font="10px -apple-system,Segoe UI,sans-serif";g.textAlign="left";g.fillText("отрицательные годы — до н. э.", padL, 10);}
   return {X,Y,padL,padR,padT,padB,iw,ih};
 }
 
@@ -499,16 +502,19 @@ sp.addEventListener("input",()=>{
 });
 
 const jump=document.getElementById("jump");
-function fmtIn(t){const o=jdToDate(t),p=n=>String(n).padStart(2,"0");return p(o.d)+"."+p(o.m)+"."+String(o.y).padStart(4,"0");}
-function parseIn(s){
-  s=s.trim();
-  let m=s.match(/^(\d{4})$/);
-  if(m) return jd(+m[1],1,1);
-  m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
-  if(m) return jd(+m[3],+m[2],+m[1]);
-  m=s.match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})$/);
-  if(m) return jd(+m[1],+m[2],+m[3]);
-  return null;
+function fmtIn(t){const o=jdToDate(t),p=n=>String(n).padStart(2,"0");return p(o.d)+"."+p(o.m)+"."+(o.y>0?String(o.y).padStart(4,"0"):(1-o.y)+" до н. э.");}
+function parseIn(raw){
+  let s=raw.trim();
+  const bc=/до\s*н\.?\s*э\.?/i.test(s);
+  s=s.replace(/до\s*н\.?\s*э\.?/i,"").trim();
+  let m,r,y,mo,d;
+  if((m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](-?\d{1,5})$/))){ d=+m[1]; mo=+m[2]; y=+m[3]; }
+  else if((m=s.match(/^(-?\d{1,5})[.\/-](\d{1,2})[.\/-](\d{1,2})$/))){ y=+m[1]; mo=+m[2]; d=+m[3]; }
+  else if((m=s.match(/^(-?\d{1,5})$/))){ y=+m[1]; mo=1; d=1; }
+  else return null;
+  if(bc) y=1-y;
+  if(mo<1||mo>12||d<1||d>31) return null;
+  return jd(y,mo,d);
 }
 function syncJump(){
   if(document.activeElement===jump) return;
