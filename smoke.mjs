@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -51,7 +51,7 @@ const panels = {
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
-['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump'].forEach(id => {
+['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme'].forEach(id => {
   nodes[id] = el(id, panels[id] || null);
 });
 nodes.speed.value = '3';
@@ -71,7 +71,8 @@ const sandbox = {
     getElementById: id => nodes[id],
     createElement: tag => el('tmp', null),
     querySelectorAll: () => [],
-    activeElement: null
+    activeElement: null,
+    documentElement: { _a:{}, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }
   },
   setTimeout: (f, ms) => 0,
   window: {
@@ -186,6 +187,15 @@ ok('1500 кадров без падения', !crash, crash ? crash.message : '�
 
 const p = T.planet(T.PL[4], (T.state.t - 2451545.0) / 36525);
 ok('Юпитер в разумных пределах', p.r > 4.9 && p.r < 5.5, 'r=' + p.r.toFixed(3) + ' а.е.');
+
+const de = sandbox.document.documentElement;
+T.applyTheme();
+nodes.theme._l.click[0]();
+ok('переключатель уводит в тёмную', de.getAttribute('data-theme') === 'dark' && T.getTH() === T.PAL.dark,
+   'data-theme=' + de.getAttribute('data-theme'));
+nodes.theme._l.click[0]();
+ok('переключатель возвращает светлую', de.getAttribute('data-theme') === 'light' && T.getTH() === T.PAL.light,
+   'data-theme=' + de.getAttribute('data-theme'));
 
 console.log('\nпроверок: ' + checks + ', провалов: ' + fails);
 process.exit(fails ? 1 : 0);

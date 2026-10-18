@@ -6,9 +6,27 @@
 <title>Барицентр Солнечной системы</title>
 <style>
 :root{
+  color-scheme:light;
   --bg:#F6F5F2; --panel:#FFFFFF; --line:rgba(0,0,0,.12); --line2:rgba(0,0,0,.06);
   --t1:#1D1D1B; --t2:#63635E; --t3:#8E8E88;
   --amber:#BA7517; --amber-l:#F7C873; --blue:#378ADD; --red:#A32D2D;
+  --ink:#1D1D1B; --onink:#FFFFFF; --hover:#F2F1ED;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E0F11; --panel:#17181B; --line:rgba(255,255,255,.14); --line2:rgba(255,255,255,.07);
+    --t1:#ECECE8; --t2:#A2A29C; --t3:#77776F;
+    --amber:#D89A3E; --blue:#6BA8EE; --red:#E07070;
+    --ink:#ECECE8; --onink:#12130F; --hover:#202126;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E0F11; --panel:#17181B; --line:rgba(255,255,255,.14); --line2:rgba(255,255,255,.07);
+  --t1:#ECECE8; --t2:#A2A29C; --t3:#77776F;
+  --amber:#D89A3E; --blue:#6BA8EE; --red:#E07070;
+  --ink:#ECECE8; --onink:#12130F; --hover:#202126;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--t1);font:14px/1.5 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;padding:20px 22px 28px}
@@ -19,18 +37,28 @@ h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
 .clock .d{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
 .clock .v{font-size:12px;color:var(--t2);font-variant-numeric:tabular-nums}
 .controls{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:14px;padding:10px 14px;background:var(--panel);border:.5px solid var(--line);border-radius:12px}
-button{font:inherit;font-size:13px;padding:6px 14px;border:.5px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;color:var(--t1)}
-button:hover{background:#F2F1ED}
-button.on{background:#1D1D1B;color:#fff;border-color:#1D1D1B}
+button{font:inherit;font-size:13px;padding:6px 14px;border:.5px solid var(--line);background:var(--panel);border-radius:8px;cursor:pointer;color:var(--t1)}
+button:hover{background:var(--hover)}
+button.on{background:var(--ink);color:var(--onink);border-color:var(--ink)}
 label.sp{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
-input[type=range]{width:130px;accent-color:#1D1D1B}
+input[type=range]{width:130px;accent-color:var(--ink)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 .chips button{padding:5px 10px;font-size:12px;color:var(--t2)}
-.chips button.on{color:#fff}
-#jump{width:100px;font:inherit;font-size:12px;padding:5px 7px;border:.5px solid var(--line);border-radius:7px;background:#fff;color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
-#jump:focus{outline:none;border-color:#1D1D1B}
-#jump.bad{border-color:#A32D2D;color:#A32D2D}
+.chips button.on{color:var(--onink)}
+#jump{width:100px;font:inherit;font-size:12px;padding:5px 7px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
+#jump:focus{outline:none;border-color:var(--ink)}
+#jump.bad{border-color:var(--red);color:var(--red)}
 #c3{cursor:ew-resize}
+.sw-gray{background:#8E8E88}.sw-blue{background:#378ADD}.sw-amber{background:#BA7517}
+:root[data-theme="dark"] .sw-gray{background:#9A9A94}
+:root[data-theme="dark"] .sw-blue{background:#6BA8EE}
+:root[data-theme="dark"] .sw-amber{background:#D89A3E}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .sw-gray{background:#9A9A94}
+  :root:not([data-theme="light"]) .sw-blue{background:#6BA8EE}
+  :root:not([data-theme="light"]) .sw-amber{background:#D89A3E}
+}
+#theme{margin-left:10px}
 main{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:12px 14px 10px;min-width:0}
 .panel h2{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
@@ -68,6 +96,7 @@ canvas{display:block;width:100%}
     <button data-a="1900" data-b="2100">1900–2100</button>
     <button data-a="1960" data-b="2040">1960–2040</button>
   </div>
+  <button id="theme">Тёмная</button>
 </div>
 
 <main>
@@ -75,9 +104,9 @@ canvas{display:block;width:100%}
     <h2>Солнечная система <span>радиальный масштаб логарифмический</span></h2>
     <canvas id="c1"></canvas>
     <div class="legend">
-      <span><i style="background:#8E8E88"></i>Меркурий · Венера · Марс</span>
-      <span><i style="background:#378ADD"></i>Земля</span>
-      <span><i style="background:#BA7517"></i>Юпитер · Сатурн · Уран · Нептун</span>
+      <span><i class="sw-gray"></i>Меркурий · Венера · Марс</span>
+      <span><i class="sw-blue"></i>Земля</span>
+      <span><i class="sw-amber"></i>Юпитер · Сатурн · Уран · Нептун</span>
     </div>
     <div class="cap">Расстояния сжаты логарифмом, углы сохранены. Солнце — иконка, не в масштабе: на такой карте его радиус уходит за край кадра.</div>
   </section>
@@ -122,16 +151,32 @@ function fmt(j){const o=jdToDate(j);return o.d+" "+MON[o.m-1]+" "+o.y;}
 function num(v){return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g," ");}
 
 const PL=[
- {n:"Меркурий",a:0.38709927,e:0.20563593,i:7.00497902,L:252.25032350,p:77.45779628,o:48.33076593,da:0.00000037,de:0.00001906,di:-0.00594749,dL:149472.67411175,dp:0.16047689,do:-0.12534081,c:"#8E8E88",s:2.0},
- {n:"Венера",a:0.72333566,e:0.00677672,i:3.39467605,L:181.97909950,p:131.60246718,o:76.67984255,da:0.00000390,de:-0.00004107,di:-0.00078890,dL:58517.81538729,dp:0.00268329,do:-0.27769418,c:"#8E8E88",s:2.4},
- {n:"Земля",a:1.00000261,e:0.01671123,i:-0.00001531,L:100.46457166,p:102.93768193,o:0.0,da:0.00000562,de:-0.00004392,di:-0.01294668,dL:35999.37244981,dp:0.32327364,do:0.0,c:"#378ADD",s:2.8},
- {n:"Марс",a:1.52371034,e:0.09339410,i:1.84969142,L:-4.55343205,p:-23.94362959,o:49.55953891,da:0.00001847,de:0.00007882,di:-0.00813131,dL:19140.30268499,dp:0.44441088,do:-0.29257343,c:"#8E8E88",s:2.2},
- {n:"Юпитер",a:5.20288700,e:0.04838624,i:1.30439695,L:34.39644051,p:14.72847983,o:100.47390909,da:-0.00011607,de:-0.00013253,di:-0.00183714,dL:3034.74612775,dp:0.21252668,do:0.20469106,c:"#BA7517",s:4.2},
- {n:"Сатурн",a:9.53667594,e:0.05386179,i:2.48599187,L:49.95424423,p:92.59887831,o:113.66242448,da:-0.00125060,de:-0.00050991,di:0.00193609,dL:1222.49362201,dp:-0.41897216,do:-0.28867794,c:"#BA7517",s:3.8},
- {n:"Уран",a:19.18916464,e:0.04725744,i:0.77263783,L:313.23810451,p:170.95427630,o:74.01692503,da:-0.00196176,de:-0.00004397,di:-0.00242939,dL:428.48202785,dp:0.40805281,do:0.04240589,c:"#BA7517",s:3.2},
- {n:"Нептун",a:30.06992276,e:0.00859048,i:1.77004347,L:-55.12002969,p:44.96476227,o:131.78422574,da:0.00026291,de:0.00005105,di:0.00035372,dL:218.45945325,dp:-0.32241464,do:-0.00508664,c:"#BA7517",s:3.2}
+ {n:"Меркурий",a:0.38709927,e:0.20563593,i:7.00497902,L:252.25032350,p:77.45779628,o:48.33076593,da:0.00000037,de:0.00001906,di:-0.00594749,dL:149472.67411175,dp:0.16047689,do:-0.12534081,k:"gray",s:2.0},
+ {n:"Венера",a:0.72333566,e:0.00677672,i:3.39467605,L:181.97909950,p:131.60246718,o:76.67984255,da:0.00000390,de:-0.00004107,di:-0.00078890,dL:58517.81538729,dp:0.00268329,do:-0.27769418,k:"gray",s:2.4},
+ {n:"Земля",a:1.00000261,e:0.01671123,i:-0.00001531,L:100.46457166,p:102.93768193,o:0.0,da:0.00000562,de:-0.00004392,di:-0.01294668,dL:35999.37244981,dp:0.32327364,do:0.0,k:"blue",s:2.8},
+ {n:"Марс",a:1.52371034,e:0.09339410,i:1.84969142,L:-4.55343205,p:-23.94362959,o:49.55953891,da:0.00001847,de:0.00007882,di:-0.00813131,dL:19140.30268499,dp:0.44441088,do:-0.29257343,k:"gray",s:2.2},
+ {n:"Юпитер",a:5.20288700,e:0.04838624,i:1.30439695,L:34.39644051,p:14.72847983,o:100.47390909,da:-0.00011607,de:-0.00013253,di:-0.00183714,dL:3034.74612775,dp:0.21252668,do:0.20469106,k:"amber",s:4.2},
+ {n:"Сатурн",a:9.53667594,e:0.05386179,i:2.48599187,L:49.95424423,p:92.59887831,o:113.66242448,da:-0.00125060,de:-0.00050991,di:0.00193609,dL:1222.49362201,dp:-0.41897216,do:-0.28867794,k:"amber",s:3.8},
+ {n:"Уран",a:19.18916464,e:0.04725744,i:0.77263783,L:313.23810451,p:170.95427630,o:74.01692503,da:-0.00196176,de:-0.00004397,di:-0.00242939,dL:428.48202785,dp:0.40805281,do:0.04240589,k:"amber",s:3.2},
+ {n:"Нептун",a:30.06992276,e:0.00859048,i:1.77004347,L:-55.12002969,p:44.96476227,o:131.78422574,da:0.00026291,de:0.00005105,di:0.00035372,dL:218.45945325,dp:-0.32241464,do:-0.00508664,k:"amber",s:3.2}
 ];
 const PER=[87.969,224.701,365.256,686.980,4332.59,10759.22,30688.5,60182];
+
+const PAL={
+  light:{orbit:"rgba(0,0,0,.13)",earthOrbit:"rgba(55,138,221,.45)",label:"rgba(0,0,0,.42)",
+    sun:"#F7C873",sunEdge:"#C98A2A",sunRing:"#BA7517",mark:"#1D1D1B",markOut:"#A32D2D",
+    ring:"rgba(0,0,0,.06)",curve:"#1D1D1B",grid:"rgba(0,0,0,.07)",axis:"#8E8E88",
+    band:"rgba(186,117,23,.07)",sunLine:"#BA7517",cursor:"#A32D2D",cursorRing:"rgba(163,45,45,.28)",
+    trailRGB:"186,117,23",markText:"rgba(0,0,0,.5)",
+    gray:"#8E8E88",blue:"#378ADD",amber:"#BA7517"},
+  dark:{orbit:"rgba(255,255,255,.16)",earthOrbit:"rgba(107,168,238,.5)",label:"rgba(255,255,255,.5)",
+    sun:"#F7C873",sunEdge:"#E0A65A",sunRing:"#D89A3E",mark:"#ECECE8",markOut:"#E07070",
+    ring:"rgba(255,255,255,.07)",curve:"#E8E8E2",grid:"rgba(255,255,255,.08)",axis:"#7C7C76",
+    band:"rgba(216,154,62,.10)",sunLine:"#D89A3E",cursor:"#E07070",cursorRing:"rgba(224,112,112,.3)",
+    trailRGB:"216,154,62",markText:"rgba(255,255,255,.5)",
+    gray:"#9A9A94",blue:"#6BA8EE",amber:"#D89A3E"}
+};
+let TH=PAL.light;
 
 function planet(P,T){
   const a=P.a+P.da*T, e=P.e+P.de*T, I=(P.i+P.di*T)*RAD;
@@ -179,14 +224,14 @@ function drawSystem(){
       k?g1.lineTo(x,y):g1.moveTo(x,y);
     }
     g1.closePath();
-    g1.strokeStyle=(PL[i].n==="Земля")?"rgba(55,138,221,.45)":"rgba(0,0,0,.13)";
+    g1.strokeStyle=(PL[i].n==="Земля")?TH.earthOrbit:TH.orbit;
     g1.lineWidth=(PL[i].n==="Земля")?1.2:0.8;
     g1.stroke();
   }
 
   const inside=Rof(state.t)<RS;
-  g1.beginPath(); g1.arc(0,0,11,0,7); g1.fillStyle="#F7C873"; g1.fill();
-  g1.strokeStyle=inside?"#C98A2A":"#BA7517"; g1.lineWidth=inside?1:2.4; g1.stroke();
+  g1.beginPath(); g1.arc(0,0,11,0,7); g1.fillStyle=TH.sun; g1.fill();
+  g1.strokeStyle=inside?TH.sunEdge:TH.sunRing; g1.lineWidth=inside?1:2.4; g1.stroke();
 
   const T=(state.t-2451545.0)/36525;
   const dps=state.speed*365.25;
@@ -202,13 +247,13 @@ function drawSystem(){
         const q=planet(P,tt), qr=logRadius(q.r,Rmax);
         g1.beginPath();
         g1.arc(qr*Math.cos(q.lon),qr*Math.sin(q.lon),P.s*(1-s/steps*0.75),0,7);
-        g1.fillStyle=P.c; g1.globalAlpha=0.28*(1-s/steps); g1.fill();
+        g1.fillStyle=TH[P.k]; g1.globalAlpha=0.28*(1-s/steps); g1.fill();
       }
       g1.globalAlpha=1;
     }
-    g1.beginPath(); g1.arc(x,y,P.s,0,7); g1.fillStyle=P.c; g1.fill();
+    g1.beginPath(); g1.arc(x,y,P.s,0,7); g1.fillStyle=TH[P.k]; g1.fill();
     if(i>=4){
-      g1.font="10px -apple-system,Segoe UI,sans-serif"; g1.fillStyle="rgba(0,0,0,.42)";
+      g1.font="10px -apple-system,Segoe UI,sans-serif"; g1.fillStyle=TH.label;
       g1.textAlign="center";
       const rr=rho+13;
       g1.fillText(P.n, rr*Math.cos(pos.lon), rr*Math.sin(pos.lon)+3);
@@ -223,7 +268,7 @@ function drawSun(){
   g2.clearRect(0,0,w,h);
   g2.save(); g2.translate(cx,cy);
 
-  g2.strokeStyle="rgba(0,0,0,.06)"; g2.lineWidth=1;
+  g2.strokeStyle=TH.ring; g2.lineWidth=1;
   for(let k=1;k<=3;k++){g2.beginPath();g2.arc(0,0,k*0.55e6*scale,0,7);g2.stroke();}
 
   const p=at(state.t);
@@ -234,23 +279,23 @@ function drawSun(){
     if(tt<T0) continue;
     const q=at(tt);
     g2.beginPath(); g2.arc(-q[0]*scale,-q[1]*scale,1.1,0,7);
-    g2.fillStyle="rgba(186,117,23,"+(0.05+0.42*(1-s/steps))+")"; g2.fill();
+    g2.fillStyle="rgba("+TH.trailRGB+","+(0.05+0.42*(1-s/steps))+")"; g2.fill();
   }
 
   const rSun=RS*scale;
   g2.beginPath(); g2.arc(sx,sy,rSun,0,7);
-  g2.fillStyle="#F7C873"; g2.fill();
-  g2.strokeStyle="#C98A2A"; g2.lineWidth=1; g2.stroke();
+  g2.fillStyle=TH.sun; g2.fill();
+  g2.strokeStyle=TH.sunEdge; g2.lineWidth=1; g2.stroke();
   g2.beginPath(); g2.arc(sx,sy,rSun*0.985,0,7); g2.strokeStyle="rgba(201,138,42,.35)"; g2.lineWidth=0.8; g2.stroke();
 
   const outside=Math.hypot(p[0],p[1])>RS;
-  g2.strokeStyle=outside?"#A32D2D":"#1D1D1B"; g2.lineWidth=1.2;
+  g2.strokeStyle=outside?TH.markOut:TH.mark; g2.lineWidth=1.2;
   g2.beginPath(); g2.moveTo(-11,0); g2.lineTo(11,0); g2.moveTo(0,-11); g2.lineTo(0,11); g2.stroke();
-  g2.beginPath(); g2.arc(0,0,4.5,0,7); g2.strokeStyle=outside?"#A32D2D":"#1D1D1B"; g2.lineWidth=1; g2.stroke();
+  g2.beginPath(); g2.arc(0,0,4.5,0,7); g2.strokeStyle=outside?TH.markOut:TH.mark; g2.lineWidth=1; g2.stroke();
 
-  g2.font="10px -apple-system,Segoe UI,sans-serif"; g2.fillStyle="rgba(0,0,0,.45)"; g2.textAlign="left";
+  g2.font="10px -apple-system,Segoe UI,sans-serif"; g2.fillStyle=TH.markText; g2.textAlign="left";
   g2.fillText("барицентр", 14, -8);
-  g2.textAlign="center"; g2.fillStyle="rgba(0,0,0,.55)";
+  g2.textAlign="center"; g2.fillStyle=TH.markText;
   g2.fillText("Солнце", sx, sy+rSun+14);
   g2.restore();
 }
@@ -271,10 +316,10 @@ function buildChart(){
   const X=t=>padL+(t-state.wa)/(state.wb-state.wa)*iw;
   const Y=v=>padT+ih-(v/ymax)*ih;
 
-  g.fillStyle="rgba(186,117,23,.07)";
+  g.fillStyle=TH.band;
   g.fillRect(padL,Y(RS),iw,Y(0)-Y(RS));
 
-  g.strokeStyle="rgba(0,0,0,.07)"; g.lineWidth=1;
+  g.strokeStyle=TH.grid; g.lineWidth=1;
   for(let k=0;k<=4;k++){const y=padT+ih*k/4;g.beginPath();g.moveTo(padL,y);g.lineTo(padL+iw,y);g.stroke();}
 
   g.beginPath();
@@ -285,21 +330,21 @@ function buildChart(){
     const x=X(t), y=Y(Rv[i]);
     started?g.lineTo(x,y):(g.moveTo(x,y),started=true);
   }
-  g.strokeStyle="#1D1D1B"; g.lineWidth=1.1; g.stroke();
+  g.strokeStyle=TH.curve; g.lineWidth=1.1; g.stroke();
 
-  g.setLineDash([4,4]); g.strokeStyle="#BA7517"; g.lineWidth=1;
+  g.setLineDash([4,4]); g.strokeStyle=TH.sunLine; g.lineWidth=1;
   g.beginPath(); g.moveTo(padL,Y(RS)); g.lineTo(padL+iw,Y(RS)); g.stroke(); g.setLineDash([]);
 
-  g.font="10px -apple-system,Segoe UI,sans-serif"; g.fillStyle="#8E8E88"; g.textAlign="right";
+  g.font="10px -apple-system,Segoe UI,sans-serif"; g.fillStyle=TH.axis; g.textAlign="right";
   for(let k=0;k<=4;k++){
     const v=ymax*k/4, y=padT+ih-ih*k/4;
     g.fillText(num(v/1000)+" тыс.", padL-8, y+3);
-    g.textAlign="left"; g.fillStyle="#8E8E88";
+    g.textAlign="left"; g.fillStyle=TH.axis;
     g.fillText((v-RS>=0?"+":"−")+num(Math.abs(v-RS)/1000)+" тыс.", padL+iw+8, y+3);
-    g.textAlign="right"; g.fillStyle="#8E8E88";
+    g.textAlign="right"; g.fillStyle=TH.axis;
   }
 
-  g.textAlign="center"; g.fillStyle="#8E8E88";
+  g.textAlign="center"; g.fillStyle=TH.axis;
   const years=(state.wb-state.wa)/365.25;
   const stepY=years>600?200:years>200?50:years>80?20:10;
   const y0=Math.ceil((1500+(state.wa-T0)/365.25)/stepY)*stepY;
@@ -317,11 +362,11 @@ function drawChart(){
   if(chartBuf) g3.drawImage(chartBuf,0,0,w,h);
   const padL=52,padR=64,iw=w-padL-padR;
   const x=padL+(state.t-state.wa)/(state.wb-state.wa)*iw;
-  g3.strokeStyle="#A32D2D"; g3.lineWidth=1.2;
+  g3.strokeStyle=TH.cursor; g3.lineWidth=1.2;
   g3.beginPath(); g3.moveTo(x,14); g3.lineTo(x,h-22); g3.stroke();
-  g3.beginPath(); g3.arc(x,13,4.5,0,7); g3.fillStyle="#A32D2D"; g3.fill();
-  g3.beginPath(); g3.arc(x,13,7.5,0,7); g3.strokeStyle="rgba(163,45,45,.28)"; g3.lineWidth=1; g3.stroke();
-  g3.beginPath(); g3.arc(x,h-22,2.6,0,7); g3.fillStyle="#A32D2D"; g3.fill();
+  g3.beginPath(); g3.arc(x,13,4.5,0,7); g3.fillStyle=TH.cursor; g3.fill();
+  g3.beginPath(); g3.arc(x,13,7.5,0,7); g3.strokeStyle=TH.cursorRing; g3.lineWidth=1; g3.stroke();
+  g3.beginPath(); g3.arc(x,h-22,2.6,0,7); g3.fillStyle=TH.cursor; g3.fill();
 }
 
 function readout(){
@@ -458,7 +503,30 @@ window.addEventListener("mouseup",e=>{
   }
   drag=null;
 });
+const rootEl=document.documentElement, themeBtn=document.getElementById("theme");
+function sysDark(){return !!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);}
+let manual=null;
+try{manual=localStorage.getItem("barysim-theme");}catch(e){}
+function applyTheme(){
+  const dark=manual?manual==="dark":sysDark();
+  rootEl.setAttribute("data-theme",dark?"dark":"light");
+  TH=dark?PAL.dark:PAL.light;
+  themeBtn.textContent=dark?"Светлая":"Тёмная";
+  buildChart();
+}
+themeBtn.addEventListener("click",()=>{
+  const dark=rootEl.getAttribute("data-theme")==="dark";
+  manual=dark?"light":"dark";
+  try{localStorage.setItem("barysim-theme",manual);}catch(e){}
+  applyTheme();
+});
+if(window.matchMedia){
+  const mq=window.matchMedia("(prefers-color-scheme: dark)");
+  if(mq.addEventListener) mq.addEventListener("change",()=>{if(!manual)applyTheme();});
+}
+
 resize();
+applyTheme();
 requestAnimationFrame(loop);
 </script>
 </body>
