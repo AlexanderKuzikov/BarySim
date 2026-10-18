@@ -245,7 +245,7 @@ ok('после ввода поле показывает человеческую
 nodes.jump._l.focus[0]();
 ok('при фокусе поле переходит в цифровой вид', nodes.jump.value === T.fmtIn(T.state.t), nodes.jump.value);
 
-ok('иконка встроена как data-uri', /<link rel="icon" href="data:image\/svg\+xml,/.test(html), 'есть');
+ok('иконка встроена как data-uri', /<link rel="icon"[^>]*href="data:image\/svg\+xml,/.test(html), 'есть');
 ok('логотип в шапке', /<svg class="mark"/.test(html), 'есть');
 ok('внешних ссылок нет', !/https?:\/\//.test(html), 'ни одной');
 
