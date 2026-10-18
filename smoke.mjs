@@ -16,6 +16,9 @@ const ok = (name, cond, detail) => {
 
 const listeners = { win: {}, el: {} };
 const docL = {};
+const hdrStub = { offsetHeight: 56 };
+const mainStub = { style: {} };
+const sideStub = { style: {}, offsetHeight: 392 };
 function ctxStub() {
   const t = {};
   return new Proxy(t, {
@@ -83,7 +86,12 @@ const sandbox = {
     getElementById: id => nodes[id],
     createElement: tag => el('tmp', null),
     querySelectorAll: () => [],
-    querySelector: sel => sel === 'header' ? { offsetHeight: 56 } : { offsetHeight: 240, style: {} },
+    querySelector: sel => {
+      if (sel === 'header') return hdrStub;
+      if (sel === 'main') return mainStub;
+      if (sel === '.side') return sideStub;
+      return { offsetHeight: 240, style: {} };
+    },
     activeElement: null,
     addEventListener(t, f) { (docL[t] = docL[t] || []).push(f); },
     documentElement: { _a:{}, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }
@@ -248,6 +256,20 @@ ok('при фокусе поле переходит в цифровой вид',
 ok('иконка встроена как data-uri', /<link rel="icon"[^>]*href="data:image\/svg\+xml,/.test(html), 'есть');
 ok('логотип в шапке', /<svg class="mark"/.test(html), 'есть');
 ok('внешних ссылок нет', !/https?:\/\//.test(html), 'ни одной');
+
+ok('колонки заданы явно', /^\d+px \d+px 300px$/.test(mainStub.style.gridTemplateColumns || ''),
+   mainStub.style.gridTemplateColumns);
+ok('панели выровнены по высоте', nodes.c1.parentElement.style.minHeight === nodes.c2.parentElement.style.minHeight,
+   nodes.c1.parentElement.style.minHeight);
+
+sandbox.window.innerWidth = 1000; sandbox.window.innerHeight = 1400;
+T.resize();
+ok('узкий экран — одна колонка', /^\d+px$/.test(mainStub.style.gridTemplateColumns || ''),
+   mainStub.style.gridTemplateColumns);
+const [nw, nh] = T.getSizes();
+ok('узкий экран — сцена квадратная', nw === nh && nw <= 560, nw + '×' + nh);
+sandbox.window.innerWidth = 1440; sandbox.window.innerHeight = 900;
+T.resize();
 
 const [w1,h1,w2,h2,w3,h3] = T.getSizes();
 ok('сцены квадратные', w1 === h1 && w2 === h2 && w1 > 200, w1 + '×' + h1);

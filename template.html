@@ -32,7 +32,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--t1);font:14px/1.5 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 .app{max-width:1560px;margin:0 auto;padding:14px 18px 16px;min-height:100vh;display:flex;flex-direction:column;gap:12px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px;flex:0 0 auto}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;flex:0 0 auto}
+.datebox{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:0}
 .brand{display:flex;align-items:center;gap:11px}
 .mark{flex:0 0 auto;display:block}
 h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
@@ -44,7 +45,7 @@ h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
 .field{display:flex;flex-direction:column;gap:5px}
 .field>label{font-size:10.5px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
 .field b{font-size:12px;font-weight:500;color:var(--t2)}
-.field .v{font-size:11.5px;color:var(--t2);font-variant-numeric:tabular-nums;line-height:1.35}
+.datebox .v{font-size:11.5px;color:var(--t2);font-variant-numeric:tabular-nums;line-height:1.3}
 button{font:inherit;font-size:13px;padding:6px 14px;border:.5px solid var(--line);background:var(--panel);border-radius:8px;cursor:pointer;color:var(--t1)}
 button:hover{background:var(--hover)}
 button.on{background:var(--ink);color:var(--onink);border-color:var(--ink)}
@@ -52,11 +53,11 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .chips{display:flex;flex-direction:column;gap:5px}
 .chips button{padding:5px 10px;font-size:12px;color:var(--t2);text-align:left}
 .chips button.on{color:var(--onink)}
-#jump{width:100%;font:inherit;font-size:19px;font-weight:500;padding:7px 6px;border:.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--t1);text-align:center;font-variant-numeric:tabular-nums}
+#jump{width:300px;max-width:100%;font:inherit;font-size:21px;font-weight:500;padding:5px 10px;border:.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--t1);text-align:right;font-variant-numeric:tabular-nums}
 #jump:focus{outline:none;border-color:var(--ink)}
 #jump.bad{border-color:var(--red);color:var(--red)}
 #c3{cursor:ew-resize}
-.sw-gray{background:#8E8E88}.sw-blue{background:#378ADD}.sw-amber{background:#BA7517}
+.sw-gray{background:#8E8E88}.sw-blue{background:#378ADD}.sw-amber{background:#BA7517}.sw-red{background:var(--red)}
 :root[data-theme="dark"] .sw-gray{background:#9A9A94}
 :root[data-theme="dark"] .sw-blue{background:#6BA8EE}
 :root[data-theme="dark"] .sw-amber{background:#D89A3E}
@@ -87,19 +88,23 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .foot{font-size:11px;color:var(--t3);margin-top:20px;text-align:right}
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.modal-card{padding:26px 20px 22px}}
 main{display:grid;grid-template-columns:auto auto 300px;gap:12px;justify-content:center;align-items:start;flex:0 0 auto}
-.panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:12px 14px 10px;min-width:0}
+.panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:12px 14px 10px;min-width:0;display:flex;flex-direction:column}
+.meta{margin-top:auto}
 .panel h2{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
 .panel h2 span{font-weight:400;color:var(--t3);font-size:11px}
-canvas{display:block;width:100%}
+canvas{display:block;width:100%;flex:0 0 auto}
 .cap{font-size:11px;color:var(--t3);margin-top:6px;line-height:1.45}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--t2);margin-top:6px}
 .legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
 #wrap3{margin-bottom:4px}
 .sel{position:absolute;background:rgba(186,117,23,.12);border-left:1px solid var(--amber);border-right:1px solid var(--amber);pointer-events:none;display:none}
 #wrap3{flex:0 0 auto}
-@media (max-width:900px){
-  main{grid-template-columns:1fr;justify-content:stretch}
-  .side{order:-1}
+@media (max-width:1080px){
+  main{grid-template-columns:minmax(0,560px);justify-content:center}
+  .side{order:-1;max-height:none!important;overflow:visible}
+  header{justify-content:flex-start}
+  .datebox{align-items:flex-start}
+  #jump{text-align:left}
 }
 </style>
 </head>
@@ -117,24 +122,37 @@ canvas{display:block;width:100%}
       <div class="sub">Эфемериды JPL DE441, шаг 120 суток, 20 000 лет · <button class="linkbtn" id="about">как это читать</button></div>
     </div>
   </div>
+  <div class="datebox">
+    <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804">
+    <div class="v" id="dist">—</div>
+    <div class="v" id="surf">—</div>
+  </div>
 </header>
 
 <main>
   <section class="panel">
     <h2>Солнечная система <span>лог. масштаб</span></h2>
     <canvas id="c1"></canvas>
-    <div class="legend">
-      <span><i class="sw-gray"></i>Меркурий · Венера · Марс</span>
-      <span><i class="sw-blue"></i>Земля</span>
-      <span><i class="sw-amber"></i>Юпитер · Сатурн · Уран · Нептун</span>
+    <div class="meta">
+      <div class="legend">
+        <span><i class="sw-gray"></i>Меркурий · Венера · Марс</span>
+        <span><i class="sw-blue"></i>Земля</span>
+        <span><i class="sw-amber"></i>Юпитер · Сатурн · Уран · Нептун</span>
+      </div>
+      <div class="cap">Расстояния сжаты логарифмом, углы сохранены. Солнце — иконка, не в масштабе.</div>
     </div>
-    <div class="cap">Расстояния сжаты логарифмом, углы сохранены. Солнце — иконка, не в масштабе. Цвет и толщина ободка — величина смещения.</div>
   </section>
 
   <section class="panel">
     <h2>Солнце и барицентр <span>2,5 млн км</span></h2>
     <canvas id="c2"></canvas>
-    <div class="cap">Перекрестие — барицентр, он неподвижен. Диск Солнца смещается относительно него; след — последние 30 лет. Цвет кодирует смещение.</div>
+    <div class="meta">
+      <div class="legend">
+        <span><i class="sw-amber"></i>Солнце</span>
+        <span><i class="sw-red"></i>барицентр</span>
+      </div>
+      <div class="cap">Перекрестие неподвижно, диск Солнца смещается; след — последние 30 лет. Цвет кодирует смещение.</div>
+    </div>
   </section>
 
   <aside class="panel side">
@@ -143,12 +161,6 @@ canvas{display:block;width:100%}
       <label for="speed">Темп</label>
       <input type="range" id="speed" min="0.5" max="12" step="0.5" value="3">
       <b id="speedv">3 года/с</b>
-    </div>
-    <div class="field">
-      <label for="jump">Дата</label>
-      <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804">
-      <div class="v" id="dist">—</div>
-      <div class="v" id="surf">—</div>
     </div>
     <div class="field">
       <label>Окно</label>
@@ -526,19 +538,37 @@ function resize(){
   [W3,H3]=fitW(c3,g3,165);
   const hdr=document.querySelector("header").offsetHeight;
   const chartP=document.getElementById("wrap3").offsetHeight;
+  const main=document.querySelector("main");
+  const side=document.querySelector(".side");
   const innerW=Math.min(window.innerWidth,1560)-46;
-  const availH=Math.max(260,window.innerHeight-30-hdr-24-chartP-4);
-  const narrow=window.innerWidth<900;
-  const colW=narrow?(innerW-26):(innerW-300-24-52)/2;
-  let S=Math.max(180,narrow?colW:Math.min(colW,availH-140));
+  const p1=c1.parentElement, p2=c2.parentElement;
+
+  if(window.innerWidth<1080){
+    const col=Math.max(260,Math.min(innerW,560));
+    main.style.gridTemplateColumns=col+"px";
+    if(side) side.style.maxHeight="";
+    p1.style.minHeight=""; p2.style.minHeight="";
+    const S=Math.max(200,col-26);
+    [W1,H1]=fitSq(c1,g1,S);
+    [W2,H2]=fitSq(c2,g2,S);
+    buildChart();
+    return;
+  }
+
+  const availH=Math.max(280,window.innerHeight-30-hdr-24-chartP-4);
+  const colW=(innerW-300-24-52)/2;
+  let S=Math.max(200,Math.min(colW,availH-140));
   for(let k=0;k<2;k++){
     c1.style.width=S+"px"; c2.style.width=S+"px";
     const chrome=Math.max(chromeOf(c1),chromeOf(c2));
-    S=Math.max(180,Math.round(Math.min(colW,availH-chrome)));
+    S=Math.max(200,Math.round(Math.min(colW,availH-chrome)));
   }
   [W1,H1]=fitSq(c1,g1,S);
   [W2,H2]=fitSq(c2,g2,S);
-  const side=document.querySelector(".side");
+  main.style.gridTemplateColumns=S+"px "+S+"px 300px";
+  p1.style.minHeight=""; p2.style.minHeight="";
+  const H=Math.max(p1.offsetHeight,p2.offsetHeight);
+  p1.style.minHeight=H+"px"; p2.style.minHeight=H+"px";
   if(side) side.style.maxHeight=availH+"px";
   buildChart();
 }
