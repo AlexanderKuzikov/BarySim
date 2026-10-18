@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -51,7 +51,7 @@ const panels = {
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
-['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel'].forEach(id => {
+['date','dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump'].forEach(id => {
   nodes[id] = el(id, panels[id] || null);
 });
 nodes.speed.value = '3';
@@ -69,8 +69,11 @@ const sandbox = {
   Math, JSON, Float64Array, Number, String, Array, Object, Date, isFinite, parseFloat,
   document: {
     getElementById: id => nodes[id],
-    createElement: tag => el('tmp', null)
+    createElement: tag => el('tmp', null),
+    querySelectorAll: () => [],
+    activeElement: null
   },
+  setTimeout: (f, ms) => 0,
   window: {
     innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1,
     addEventListener(t, f) { (listeners.win[t] = listeners.win[t] || []).push(f); }
@@ -144,11 +147,38 @@ nodes.chips._l.click[0]({ target: chipBtns[1], currentTarget: nodes.chips });
 const after = T.state.wb - T.state.wa;
 ok('чип меняет окно', Math.abs(before - after) > 1, 'было ' + (before / 365.25).toFixed(0) + ' лет, стало ' + (after / 365.25).toFixed(0));
 
-nodes.c3._l.mousedown[0]({ clientX: 300 });
-listeners.win.mousemove[0]({ clientX: 500 });
-listeners.win.mouseup[0]({ clientX: 500 });
+const pd = () => {};
+T.setWindow(T.T0 + 300 * 365.25, T.T0 + 400 * 365.25);
+const t0 = T.state.t;
+nodes.c3._l.mousedown[0]({ clientX: 300, shiftKey: false, preventDefault: pd });
+listeners.win.mousemove[0]({ clientX: 600 });
+listeners.win.mouseup[0]({ clientX: 600 });
+ok('протяжка по графику меняет дату', Math.abs(T.state.t - t0) > 365 * 5,
+   T.fmtIn(t0) + ' -> ' + T.fmtIn(T.state.t));
+ok('дата остаётся в окне', T.state.t >= T.state.wa && T.state.t <= T.state.wb,
+   T.fmtIn(T.state.t));
+
+nodes.c3._l.mousedown[0]({ clientX: 200, shiftKey: true, preventDefault: pd });
+listeners.win.mousemove[0]({ clientX: 600 });
+listeners.win.mouseup[0]({ clientX: 600 });
 const zoomed = T.state.wb - T.state.wa;
-ok('выделение на графике сужает окно', zoomed < after, (zoomed / 365.25).toFixed(1) + ' лет');
+ok('Shift + протяжка сужает окно', zoomed < after, (zoomed / 365.25).toFixed(1) + ' лет');
+
+ok('разбор даты 19.04.1804', T.fmtIn(T.parseIn('19.04.1804')) === '19.04.1804', T.fmtIn(T.parseIn('19.04.1804')));
+ok('разбор только года', T.fmtIn(T.parseIn('1804')) === '01.01.1804', T.fmtIn(T.parseIn('1804')));
+ok('разбор ISO', T.fmtIn(T.parseIn('1804-04-19')) === '19.04.1804', T.fmtIn(T.parseIn('1804-04-19')));
+ok('мусор отвергается', T.parseIn('вчера') === null, String(T.parseIn('вчера')));
+
+T.setWindow(T.T0 + 400 * 365.25, T.T0 + 450 * 365.25);
+nodes.jump.value = '12.03.1600';
+T.applyJump();
+ok('ввод даты вне окна сдвигает окно',
+   T.state.t >= T.state.wa && T.state.t <= T.state.wb && Math.abs(T.state.t - T.T0 - 100 * 365.25) < 400,
+   T.fmtIn(T.state.t) + ', окно ' + T.fmtIn(T.state.wa) + '–' + T.fmtIn(T.state.wb));
+
+nodes.jump.value = '2400';
+T.applyJump();
+ok('ввод года в пределах ряда', T.fmtIn(T.state.t) === '01.01.2400', T.fmtIn(T.state.t));
 
 let crash = null;
 try { frame(1500); } catch (e) { crash = e; }
