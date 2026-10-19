@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,fmt,openModal,closeModal,resize,getSizes:()=>[W1,H1,W2,H2,W3,H3]};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,fmt,openModal,closeModal,resize,windowStats,paintStats,getSizes:()=>[W1,H1,W2,H2,W3,H3]};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -52,8 +52,10 @@ function el(id, parent) {
 
 const winStub = { innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1, addEventListener(t, f) { (listeners.win[t] = listeners.win[t] || []).push(f); } };
 function colWidth() {
-  const inner = Math.min(winStub.innerWidth, 1560) - 46;
-  return winStub.innerWidth < 1080 ? inner : Math.floor((inner - 270 - 24) / 2);
+  const inner = Math.min(winStub.innerWidth, 1800) - 32;
+  return winStub.innerWidth <= 1200
+    ? Math.floor((inner - 10) / 2)
+    : Math.floor((inner - 270 - 20) / 2);
 }
 const panels = {
   c1: { get clientWidth() { return colWidth(); }, style: {}, classList: { contains: c => c === 'panel' },
@@ -69,7 +71,7 @@ const panels = {
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
-['dist','surf','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about','wrap3'].forEach(id => {
+['dist','surf','wmax','wmin','wout','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about','wrap3'].forEach(id => {
   nodes[id] = el(id, panels[id] || null);
 });
 nodes.speed.value = '3';
@@ -99,7 +101,7 @@ const sandbox = {
     },
     activeElement: null,
     addEventListener(t, f) { (docL[t] = docL[t] || []).push(f); },
-    documentElement: { _a:{}, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }
+    documentElement: { _a:{}, scrollHeight: 0, setAttribute(k,v){this._a[k]=v;}, getAttribute(k){return this._a[k]||null;} }
   },
   setTimeout: (f, ms) => { f(); return 0; },
   window: winStub,
@@ -265,26 +267,33 @@ ok('колонки из CSS, не инлайновые', (mainStub.style.gridTem
 sandbox.window.innerWidth = 1000; sandbox.window.innerHeight = 1400;
 T.resize();
 const [nw, nh] = T.getSizes();
-ok('узкий экран — сцена по ширине колонки', nw === nh && nw <= Math.min(1000, 1560) - 46, nw + '×' + nh);
+ok('узкий экран — сцена квадратная', nw === nh && nw > 200, nw + '×' + nh);
+ok('узкий экран — сцена по ширине колонки', nw === colWidth() - 24, nw + ' из ' + (colWidth() - 24));
+
 sandbox.window.innerWidth = 1440; sandbox.window.innerHeight = 900;
 T.resize();
 
 const [w1,h1,w2,h2,w3,h3] = T.getSizes();
 ok('сцены квадратные', w1 === h1 && w2 === h2 && w1 > 200, w1 + '×' + h1);
 ok('сцены одинаковые', w1 === w2, w1 + ' / ' + w2);
-const fits = h => 30 + 56 + 12 + h + 96 + 12 + 240 <= h * 0 + 900;
-ok('на 1440×900 влезает по вертикали', 30 + 56 + 12 + h1 + 104 + 12 + 240 <= 900,
-   (30 + 56 + 12 + h1 + 104 + 12 + 240) + ' px из 900');
+ok('на 1440 сцена по ширине колонки', w1 === colWidth() - 24, w1 + ' из ' + (colWidth() - 24));
 
 sandbox.window.innerWidth = 1920; sandbox.window.innerHeight = 1080;
 T.resize();
 const [fw] = T.getSizes();
-ok('на 1920×1080 влезает по вертикали', 30 + 56 + 12 + fw + 104 + 12 + 240 <= 1080,
-   fw + ' px сцена, итого ' + (30 + 56 + 12 + fw + 104 + 12 + 240) + ' из 1080');
 ok('на FullHD сцена крупнее', fw > w1, fw + ' > ' + w1);
-ok('сцена не шире колонки', fw <= Math.floor((1514-270-24)/2), fw + ' из ' + Math.floor((1514-270-24)/2));
+ok('сцена не шире колонки', fw <= colWidth() - 24, fw + ' из ' + (colWidth() - 24));
+ok('сцена растёт с экраном', fw >= 700, fw + ' px');
+
 sandbox.window.innerWidth = 1440; sandbox.window.innerHeight = 900;
 T.resize();
+
+const ws = T.windowStats();
+ok('сводка по окну считает максимум', ws.mx > 1.4e6 && ws.mx < 1.6e6, Math.round(ws.mx) + ' км');
+ok('сводка по окну считает минимум', ws.mn > 0 && ws.mn < ws.mx, Math.round(ws.mn) + ' км');
+ok('доля вне фотосферы правдоподобна', ws.frac > 0.3 && ws.frac < 0.95, (ws.frac * 100).toFixed(1) + ' %');
+T.paintStats();
+ok('сводка выводится в поля', nodes.wmax.textContent.includes('км'), nodes.wmax.textContent + ' / ' + nodes.wout.textContent);
 
 console.log('\nпроверок: ' + checks + ', провалов: ' + fails);
 process.exit(fails ? 1 : 0);

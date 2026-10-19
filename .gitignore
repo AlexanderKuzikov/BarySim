@@ -10,3 +10,5 @@ check.js
 _*.js
 _*.html
 _*.mjs
+.ctmp/
+shots/

@@ -31,10 +31,11 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--t1);font:14px/1.5 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
-.app{max-width:1560px;margin:0 auto;padding:14px 18px 16px;min-height:100vh;display:flex;flex-direction:column;gap:12px}
-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;flex:0 0 auto}
-.datebox{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:0}
-.nums{display:flex;gap:12px;font-size:11px;color:var(--t2);font-variant-numeric:tabular-nums}
+.app{max-width:1800px;margin:0 auto;padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:0 0 auto}
+.datebox{display:flex;flex-direction:column;gap:3px;min-width:0}
+.datebox>label{font-size:10.5px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
+.nums{display:flex;flex-direction:column;gap:1px;font-size:11px;color:var(--t2);font-variant-numeric:tabular-nums;line-height:1.35}
 .brand{display:flex;align-items:center;gap:11px}
 .mark{flex:0 0 auto;display:block}
 h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
@@ -42,18 +43,22 @@ h1{font-size:17px;font-weight:500;letter-spacing:-.01em}
 
 
 
-.side{display:flex;flex-direction:column;gap:10px;padding:12px;overflow-y:auto;overflow-x:hidden}
+.side{display:flex;flex-direction:column;gap:8px;padding:10px 12px;overflow-y:auto;overflow-x:hidden}
+.side>#theme{margin-top:auto}
 .field{display:flex;flex-direction:column;gap:5px}
 .field>label{font-size:10.5px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
 .field b{font-size:12px;font-weight:500;color:var(--t2)}
+.rows{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--t3)}
+.rows>div{display:flex;justify-content:space-between;gap:8px}
+.rows b{font-weight:500;color:var(--t1);font-variant-numeric:tabular-nums}
 button{font:inherit;font-size:13px;padding:6px 14px;border:.5px solid var(--line);background:var(--panel);border-radius:8px;cursor:pointer;color:var(--t1)}
 button:hover{background:var(--hover)}
 button.on{background:var(--ink);color:var(--onink);border-color:var(--ink)}
 input[type=range]{width:100%;accent-color:var(--ink)}
-.chips{display:flex;flex-direction:column;gap:5px}
-.chips button{padding:5px 10px;font-size:12px;color:var(--t2);text-align:left}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.chips button{padding:4px 8px;font-size:11.5px;color:var(--t2);text-align:center}
 .chips button.on{color:var(--onink)}
-#jump{width:300px;max-width:100%;font:inherit;font-size:21px;font-weight:500;padding:5px 10px;border:.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--t1);text-align:right;font-variant-numeric:tabular-nums}
+#jump{width:100%;font:inherit;font-size:20px;font-weight:500;padding:4px 8px;border:.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--t1);text-align:right;font-variant-numeric:tabular-nums}
 #jump:focus{outline:none;border-color:var(--ink)}
 #jump.bad{border-color:var(--red);color:var(--red)}
 #c3{cursor:ew-resize}
@@ -87,29 +92,50 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .stat span{display:block;font-size:11px;color:var(--t3);margin-top:3px;line-height:1.35}
 .foot{font-size:11px;color:var(--t3);margin-top:20px;text-align:right}
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.modal-card{padding:26px 20px 22px}}
-main{display:grid;grid-template-columns:1fr 1fr 270px;gap:12px;justify-content:stretch;align-items:start;flex:0 0 auto}
-.panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:12px 14px 10px;min-width:0;display:flex;flex-direction:column}
+main{display:grid;grid-template-columns:1fr 1fr 270px;gap:10px;align-items:stretch;flex:0 0 auto}
+.panel{background:var(--panel);border:.5px solid var(--line);border-radius:12px;padding:10px 12px 8px;min-width:0;display:flex;flex-direction:column}
+.phead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:5px;flex-wrap:wrap}
 
-.panel h2{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
+.panel h2{font-size:12px;font-weight:500;color:var(--t2);display:flex;gap:6px;align-items:baseline;white-space:nowrap}
 .panel h2 span{font-weight:400;color:var(--t3);font-size:11px}
 canvas{display:block;margin:0 auto;flex:0 0 auto}
 .cap{font-size:11px;color:var(--t3);margin-top:6px;line-height:1.45}
-.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:10.5px;color:var(--t3);margin-top:5px;justify-content:center}
+.legend{display:flex;flex-wrap:wrap;gap:9px;font-size:10px;color:var(--t3);line-height:1.2}
 .legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
-#wrap3{margin-bottom:4px}
 .sel{position:absolute;background:rgba(186,117,23,.12);border-left:1px solid var(--amber);border-right:1px solid var(--amber);pointer-events:none;display:none}
 #wrap3{flex:0 0 auto}
-@media (max-width:1080px){
-  main{grid-template-columns:1fr;justify-content:stretch}
-  .side{order:-1;max-height:none!important;overflow:visible;flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:14px}
-  .side>button{flex:0 0 auto}
-  .side .field{flex:1 1 170px}
-  .side .chips{flex-direction:row;flex-wrap:wrap}
+#wrap3 .cap{margin-top:4px}
+@media (max-height:820px){
+  .side{gap:6px;padding:8px 10px}
+  .rows{font-size:11px;gap:1px}
+}
+@media (max-height:770px){
+  .wstat{display:none}
+}
+@media (max-width:1200px){
+  main{grid-template-columns:1fr 1fr}
+  .side{grid-column:1/-1;order:-1;max-height:none!important;overflow:visible;
+        flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:14px 18px}
+  .side>#theme{margin-top:0;margin-left:auto}
+  .side .datebox{flex:0 0 220px}
+  .side .field{flex:1 1 200px}
+  .side .wstat{flex:0 0 auto}
+  .side .wstat .rows{gap:0}
+  .side .wstat .rows>div{justify-content:flex-start;gap:6px}
+  .side .chips{display:flex;flex-direction:row;flex-wrap:wrap}
   .side .chips button{flex:1 1 auto;text-align:center}
-  header{justify-content:flex-start}
-  .datebox{align-items:flex-start}
-  .nums{flex-wrap:wrap}
+  .nums{flex-direction:row;gap:14px}
   #jump{text-align:left}
+}
+@media (max-width:760px){
+  main{grid-template-columns:1fr}
+  header{flex-wrap:wrap;gap:8px}
+  .side{flex-direction:column;align-items:stretch}
+  .side>#theme{margin-left:0;margin-top:0}
+  .side .field{flex:0 0 auto}
+  .side .datebox{flex:0 0 auto}
+  .nums{flex-direction:column;gap:1px}
+  .phead{flex-wrap:wrap;gap:4px}
 }
 </style>
 </head>
@@ -124,37 +150,42 @@ canvas{display:block;margin:0 auto;flex:0 0 auto}
     </svg>
     <div>
       <h1>Барицентр Солнечной системы</h1>
-      <div class="sub">Эфемериды JPL DE441, шаг 120 суток, 20 000 лет · <button class="linkbtn" id="about">как это читать</button></div>
+      <div class="sub">Эфемериды JPL DE441, шаг 120 суток, 20 000 лет</div>
     </div>
   </div>
-  <div class="datebox">
-    <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804">
-    <div class="nums"><span id="dist">—</span><span id="surf">—</span></div>
-  </div>
+  <button class="linkbtn" id="about">как это читать</button>
 </header>
 
 <main>
   <section class="panel">
-    <h2>Солнечная система <span>лог. масштаб</span></h2>
-    <canvas id="c1"></canvas>
-    <div class="legend">
-      <span><i class="sw-gray"></i>планеты земной группы</span>
-      <span><i class="sw-blue"></i>Земля</span>
-      <span><i class="sw-amber"></i>газовые гиганты</span>
+    <div class="phead">
+      <h2>Солнечная система <span>лог. масштаб</span></h2>
+      <div class="legend">
+        <span><i class="sw-gray"></i>земная группа</span>
+        <span><i class="sw-blue"></i>Земля</span>
+        <span><i class="sw-amber"></i>гиганты</span>
+      </div>
     </div>
+    <canvas id="c1"></canvas>
   </section>
 
   <section class="panel">
-    <h2>Солнце и барицентр <span>2,5 млн км</span></h2>
-    <canvas id="c2"></canvas>
-    <div class="legend">
-      <span><i class="sw-amber"></i>Солнце</span>
-      <span><i class="sw-red"></i>барицентр</span>
-      <span>цвет диска — величина смещения</span>
+    <div class="phead">
+      <h2>Солнце и барицентр <span>2,5 млн км</span></h2>
+      <div class="legend">
+        <span><i class="sw-amber"></i>Солнце</span>
+        <span><i class="sw-red"></i>барицентр</span>
+      </div>
     </div>
+    <canvas id="c2"></canvas>
   </section>
 
   <aside class="panel side">
+    <div class="datebox">
+      <label for="jump">Дата</label>
+      <input id="jump" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="19.04.1804">
+      <div class="nums"><span id="dist">—</span><span id="surf">—</span></div>
+    </div>
     <button id="play" class="on">Пауза</button>
     <div class="field">
       <label for="speed">Темп</label>
@@ -172,12 +203,23 @@ canvas{display:block;margin:0 auto;flex:0 0 auto}
         <button data-a="1960" data-b="2040">1960–2040</button>
       </div>
     </div>
+    <div class="field wstat">
+      <label>В этом окне</label>
+      <div class="rows">
+        <div><span>максимум</span><b id="wmax">—</b></div>
+        <div><span>минимум</span><b id="wmin">—</b></div>
+        <div><span>вне фотосферы</span><b id="wout">—</b></div>
+      </div>
+    </div>
     <button id="theme">Тёмная</button>
   </aside>
 </main>
 
 <section class="panel" id="wrap3">
-  <h2>Расстояние барицентра от Солнца <span>слева — от центра, справа — от фотосферы</span></h2>
+  <div class="phead">
+    <h2>Расстояние барицентра от Солнца</h2>
+    <div class="legend"><span>слева — от центра, справа — от фотосферы</span></div>
+  </div>
   <div style="position:relative"><canvas id="c3"></canvas><div class="sel" id="sel"></div></div>
   <div class="cap">Горизонталь — фотосфера, 695 700 км. Ниже неё барицентр внутри Солнца. Тяните по графику, чтобы менять дату; Shift + протяжка — выбрать окно.</div>
 </section>
@@ -534,19 +576,20 @@ function chromeOf(cv){
   return h;
 }
 function resize(){
-  const chartH=Math.max(110,Math.min(165,Math.round(window.innerHeight*0.16)));
+  const wide=window.innerWidth>1200;
+  const tall=window.innerHeight>1100&&!wide;
+  const chartH=Math.max(104,Math.round(Math.min(wide?170:(tall?300:150),window.innerHeight*(wide?0.155:(tall?0.22:0.13)))));
   [W3,H3]=fitW(c3,g3,chartH);
-  const hdr=document.querySelector("header").offsetHeight;
-  const chartP=document.getElementById("wrap3").offsetHeight;
+
   const main=document.querySelector("main");
   const side=document.querySelector(".side");
-  const p1=c1.parentElement, p2=c2.parentElement;
+  const p1=c1.parentElement;
 
-  if(window.innerWidth<1080){
+  if(!wide){
     main.style.gridTemplateColumns="";
     if(side) side.style.maxHeight="";
-    const cw=p1.clientWidth-26;
-    const S=Math.max(200,Math.round(Math.min(cw,window.innerHeight*0.6)));
+    const cw=Math.max(200,p1.clientWidth-24);
+    const S=Math.round(Math.max(200,Math.min(cw,window.innerHeight*0.62)));
     [W1,H1]=fitSq(c1,g1,S);
     [W2,H2]=fitSq(c2,g2,S);
     buildChart();
@@ -554,17 +597,20 @@ function resize(){
   }
 
   main.style.gridTemplateColumns="";
-  const availH=Math.max(240,window.innerHeight-30-hdr-24-chartP-4);
-  const cw=Math.max(160,p1.clientWidth-26);
-  let S=Math.max(120,Math.min(cw,availH-70));
-  for(let k=0;k<2;k++){
-    c1.style.height=S+"px"; c2.style.height=S+"px";
-    const chrome=Math.max(chromeOf(c1),chromeOf(c2));
-    S=Math.max(120,Math.round(Math.min(cw,availH-chrome)));
-  }
+  if(side) side.style.maxHeight="";
+
+  const cw=Math.max(180,p1.clientWidth-24);
+  let S=Math.round(cw);
   [W1,H1]=fitSq(c1,g1,S);
   [W2,H2]=fitSq(c2,g2,S);
-  if(side) side.style.maxHeight=availH+"px";
+
+  for(let k=0;k<4;k++){
+    const over=document.documentElement.scrollHeight-window.innerHeight;
+    if(over<=0) break;
+    S=Math.max(160,S-over-2);
+    [W1,H1]=fitSq(c1,g1,S);
+    [W2,H2]=fitSq(c2,g2,S);
+  }
   buildChart();
 }
 
@@ -605,10 +651,31 @@ function syncJump(){
   const s=fmt(state.t);
   if(jump.value!==s) jump.value=s;
 }
+function windowStats(){
+  const i0=Math.max(0,Math.ceil((state.wa-T0)/ST));
+  const i1=Math.min(N-1,Math.floor((state.wb-T0)/ST));
+  let mx=-1,mn=1e12,out=0,c=0;
+  for(let i=i0;i<=i1;i++){
+    const r=Rof(T0+i*ST);
+    if(r>mx)mx=r;
+    if(r<mn)mn=r;
+    if(r>RS)out++;
+    c++;
+  }
+  return {mx:mx<0?0:mx, mn:mn>1e11?0:mn, frac:c?out/c:0};
+}
+function paintStats(){
+  const s=windowStats();
+  const set=(id,v)=>{const e=document.getElementById(id); if(e)e.textContent=v;};
+  set("wmax",num(s.mx)+" км");
+  set("wmin",num(s.mn)+" км");
+  set("wout",Math.round(s.frac*100)+" %");
+}
 function setWindow(a,b){
   state.wa=Math.max(T0,a);
   state.wb=Math.min(T0+(N-1)*ST,b);
   state.t=Math.min(Math.max(state.t,state.wa),state.wb);
+  paintStats();
   buildChart();
 }
 function shiftWindowTo(t){
@@ -616,6 +683,7 @@ function shiftWindowTo(t){
   const a=Math.max(T0,Math.min(t-len/2,T0+(N-1)*ST-len));
   state.wa=a; state.wb=a+len;
   document.querySelectorAll("#chips button").forEach(x=>x.classList.remove("on"));
+  paintStats();
   buildChart();
 }
 function setDate(t){
@@ -720,6 +788,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.hidden)close
 
 resize();
 applyTheme();
+paintStats();
 requestAnimationFrame(loop);
 </script>
 </body>
