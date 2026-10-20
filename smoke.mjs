@@ -71,7 +71,7 @@ const panels = {
   c3: { clientWidth: 900, classList: { contains: () => false } }
 };
 const nodes = {};
-['dist','surf','wmax','wmin','wout','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about','wrap3'].forEach(id => {
+['dist','state','gap','wmax','wmin','wout','play','speed','speedv','chips','c1','c2','c3','sel','jump','theme','modal','mbg','mclose','about','wrap3'].forEach(id => {
   nodes[id] = el(id, panels[id] || null);
 });
 nodes.speed.value = '3';

@@ -79,6 +79,35 @@ for (const s of SIZES) {
   await page.close();
 }
 
+// блок чисел под датой не должен менять высоту при смене даты
+for (const vp of [{ width: 1000, height: 1400 }, { width: 1920, height: 1080 }]) {
+  const page = await browser.newPage({ viewport: vp, deviceScaleFactor: 1 });
+  await page.goto(URL, { waitUntil: 'load' });
+  await page.waitForTimeout(600);
+  const seen = [];
+  for (const d of ['28.05.2012', '15.12.2020', '01.01.2348', '01.01.1664']) {
+    await page.fill('#jump', d);
+    await page.press('#jump', 'Enter');
+    await page.waitForTimeout(200);
+    seen.push(await page.evaluate(() => {
+      const nums = document.querySelector('.nums');
+      const spans = [...nums.children];
+      return {
+        h: +nums.getBoundingClientRect().height.toFixed(1),
+        y: Math.round(document.getElementById('play').getBoundingClientRect().y),
+        clip: spans.filter(s => s.scrollWidth > s.clientWidth).length,
+      };
+    }));
+  }
+  const hs = new Set(seen.map(r => r.h));
+  const ys = new Set(seen.map(r => r.y));
+  check(`${vp.width}×${vp.height}: блок чисел не меняет высоту`, hs.size === 1, [...hs].join(' / '));
+  check(`${vp.width}×${vp.height}: кнопка не прыгает`, ys.size === 1, [...ys].join(' / '));
+  check(`${vp.width}×${vp.height}: числа не обрезаны`, seen.every(r => r.clip === 0),
+        seen.reduce((a, r) => a + r.clip, 0) + ' обрезанных');
+  await page.close();
+}
+
 await browser.close();
 console.log('\n' + (fails ? 'ПРОВАЛОВ: ' + fails + ' из ' + checks : 'все ' + checks + ' проверок пройдены'));
 process.exit(fails ? 1 : 0);
