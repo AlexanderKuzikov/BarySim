@@ -52,10 +52,10 @@ function el(id, parent) {
 
 const winStub = { innerWidth: 1440, innerHeight: 900, devicePixelRatio: 1, addEventListener(t, f) { (listeners.win[t] = listeners.win[t] || []).push(f); } };
 function colWidth() {
-  const inner = Math.min(winStub.innerWidth, 1800) - 32;
-  return winStub.innerWidth <= 1200
-    ? Math.floor((inner - 10) / 2)
-    : Math.floor((inner - 270 - 20) / 2);
+  const w = winStub.innerWidth, h = winStub.innerHeight;
+  const inner = Math.min(w, 1800) - 32;
+  if (w > 760 && w <= 1200 && h > w) return inner - 220 - 10;
+  return w <= 1200 ? Math.floor((inner - 10) / 2) : Math.floor((inner - 270 - 20) / 2);
 }
 const panels = {
   c1: { get clientWidth() { return colWidth(); }, style: {}, classList: { contains: c => c === 'panel' },
@@ -267,8 +267,10 @@ ok('колонки из CSS, не инлайновые', (mainStub.style.gridTem
 sandbox.window.innerWidth = 1000; sandbox.window.innerHeight = 1400;
 T.resize();
 const [nw, nh] = T.getSizes();
-ok('узкий экран — сцена квадратная', nw === nh && nw > 200, nw + '×' + nh);
-ok('узкий экран — сцена по ширине колонки', nw === colWidth() - 24, nw + ' из ' + (colWidth() - 24));
+ok('портрет — сцена квадратная', nw === nh && nw > 200, nw + '×' + nh);
+ok('портрет — сцена по правой колонке', nw === colWidth() - 24, nw + ' из ' + (colWidth() - 24));
+ok('портрет — сцена крупнее прежних двух колонок', nw > Math.floor((Math.min(1000,1800) - 42) / 2) - 24,
+   nw + ' px');
 
 sandbox.window.innerWidth = 1440; sandbox.window.innerHeight = 900;
 T.resize();
