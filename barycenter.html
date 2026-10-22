@@ -387,11 +387,24 @@ function sunTexture(){
   c.width=S; c.height=S;
   const x=c.getContext("2d");
   x.fillStyle="#ffffff"; x.fillRect(0,0,S,S);
-  for(let i=0;i<2600;i++){
-    const px=Math.random()*S, py=Math.random()*S, rr=0.8+Math.random()*4.2;
-    const a=0.04+Math.random()*0.14;
+  for(let i=0;i<820;i++){
+    const px=Math.random()*S, py=Math.random()*S, rr=3+Math.random()*9;
+    const cg=x.createRadialGradient(px,py,0,px,py,rr);
+    if(Math.random()<0.62){
+      cg.addColorStop(0,"rgba(255,255,255,0.34)");
+      cg.addColorStop(0.62,"rgba(255,246,224,0.12)");
+      cg.addColorStop(1,"rgba(255,255,255,0)");
+    }else{
+      cg.addColorStop(0,"rgba(150,84,26,0.30)");
+      cg.addColorStop(0.7,"rgba(150,84,26,0.10)");
+      cg.addColorStop(1,"rgba(150,84,26,0)");
+    }
+    x.fillStyle=cg; x.beginPath(); x.arc(px,py,rr,0,7); x.fill();
+  }
+  for(let i=0;i<900;i++){
+    const px=Math.random()*S, py=Math.random()*S, rr=0.7+Math.random()*1.8;
     x.beginPath(); x.arc(px,py,rr,0,7);
-    x.fillStyle=Math.random()<0.58 ? "rgba(255,255,255,"+a+")" : "rgba(120,58,8,"+(a*0.85)+")";
+    x.fillStyle="rgba(120,64,16,"+(0.05+Math.random()*0.09)+")";
     x.fill();
   }
   sunTex=c; return c;
@@ -400,37 +413,66 @@ function shade(st,target,k){
   const m=(a,b)=>Math.round(a+(b-a)*k);
   return "rgb("+m(st.r,target)+","+m(st.g,target)+","+m(st.b,target)+")";
 }
+function sunRays(g,x,y,r,st,t,count,minLen,maxLen,alpha,spin){
+  for(let i=0;i<count;i++){
+    const a=(i/count)*Math.PI*2+spin;
+    const wob=0.5+0.5*Math.sin(i*7.13+t*0.37+i*0.7);
+    const len=r*(minLen+(maxLen-minLen)*wob);
+    const w=0.015+0.036*wob;
+    const c=Math.cos(a), sn=Math.sin(a);
+    const x1=x+Math.cos(a-w)*r*0.97, y1=y+Math.sin(a-w)*r*0.97;
+    const x2=x+Math.cos(a+w)*r*0.97, y2=y+Math.sin(a+w)*r*0.97;
+    const x3=x+c*len, y3=y+sn*len;
+    const lg=g.createLinearGradient(x1,y1,x3,y3);
+    lg.addColorStop(0,"rgba("+st.r+","+st.g+","+st.b+","+alpha+")");
+    lg.addColorStop(0.5,"rgba("+st.r+","+st.g+","+st.b+","+(alpha*0.32)+")");
+    lg.addColorStop(1,"rgba("+st.r+","+st.g+","+st.b+",0)");
+    g.fillStyle=lg;
+    g.beginPath(); g.moveTo(x1,y1); g.lineTo(x3,y3); g.lineTo(x2,y2); g.closePath(); g.fill();
+  }
+}
 function paintSun(g,x,y,r,st,ts,t){
-  const glowR=r*2.8;
-  const gg=g.createRadialGradient(x,y,r*0.8,x,y,glowR);
-  gg.addColorStop(0,"rgba("+st.r+","+st.g+","+st.b+",0.30)");
-  gg.addColorStop(0.3,"rgba("+st.r+","+st.g+","+st.b+",0.11)");
-  gg.addColorStop(0.62,"rgba("+st.r+","+st.g+","+st.b+",0.035)");
+  t=t||0;
+  if(r>16){
+    const breath=0.88+0.12*Math.sin(t*0.9);
+    sunRays(g,x,y,r,st,t,10,2.8,5.2,0.055*breath,t*0.0005);
+    sunRays(g,x,y,r,st,t,16,1.8,3.4,0.095*breath,t*0.0007);
+    sunRays(g,x,y,r,st,t,26,1.14,2.0,0.145*breath,t*0.0011+0.4);
+  }
+
+  const glowR=r*2.4;
+  const gg=g.createRadialGradient(x,y,r*0.82,x,y,glowR);
+  gg.addColorStop(0,"rgba("+st.r+","+st.g+","+st.b+",0.42)");
+  gg.addColorStop(0.28,"rgba("+st.r+","+st.g+","+st.b+",0.15)");
+  gg.addColorStop(0.6,"rgba("+st.r+","+st.g+","+st.b+",0.04)");
   gg.addColorStop(1,"rgba("+st.r+","+st.g+","+st.b+",0)");
   g.fillStyle=gg; g.beginPath(); g.arc(x,y,glowR,0,7); g.fill();
 
   const dg=g.createRadialGradient(x-r*0.18,y-r*0.18,r*0.04,x,y,r*1.02);
-  dg.addColorStop(0,shade(st,255,0.34));
-  dg.addColorStop(0.42,shade(st,255,0.10));
+  dg.addColorStop(0,shade(st,255,0.54));
+  dg.addColorStop(0.42,shade(st,255,0.14));
   dg.addColorStop(0.72,st.disc);
-  dg.addColorStop(0.92,shade(st,0,0.09));
-  dg.addColorStop(1,st.edge);
+  dg.addColorStop(0.9,shade(st,0,0.16));
+  dg.addColorStop(1,shade(st,0,0.30));
   g.fillStyle=dg; g.beginPath(); g.arc(x,y,r,0,7); g.fill();
 
   if(r>16){
     g.save();
     g.beginPath(); g.arc(x,y,r,0,7); g.clip();
-    g.globalAlpha=0.14;
-    g.translate(x,y); g.rotate((t||0)*0.02);
+    g.globalAlpha=0.18;
+    g.translate(x,y); g.rotate(t*0.02);
     const S=r*2.9;
     g.drawImage(sunTexture(),-S/2,-S/2,S,S);
     g.restore();
+
   }
 
-  g.beginPath(); g.arc(x,y,r,0,7);
-  g.strokeStyle="rgba("+st.r+","+st.g+","+st.b+",0.6)";
-  g.lineWidth=Math.max(0.8,r*0.014);
+  g.beginPath(); g.arc(x,y,r*0.995,0,7);
+  g.strokeStyle=shade(st,255,0.42);
+  g.globalAlpha=0.75;
+  g.lineWidth=Math.max(1,r*0.016);
   g.stroke();
+  g.globalAlpha=1;
 }
 
 function planet(P,T){
@@ -553,8 +595,9 @@ function drawSun(){
   g2.beginPath(); g2.moveTo(-11,0); g2.lineTo(11,0); g2.moveTo(0,-11); g2.lineTo(0,11); g2.stroke();
   g2.beginPath(); g2.arc(0,0,4.5,0,7); g2.strokeStyle=outside?TH.markOut:TH.mark; g2.lineWidth=1; g2.stroke();
 
-  g2.font="10px -apple-system,Segoe UI,sans-serif"; g2.fillStyle=TH.markText; g2.textAlign="left";
-  g2.fillText("барицентр", 14, -8);
+  g2.font="10px -apple-system,Segoe UI,sans-serif"; g2.fillStyle=TH.markText;
+  g2.textAlign="center";
+  g2.fillText("барицентр", 0, sy<0 ? 18 : -12);
   g2.textAlign="center"; g2.fillStyle=TH.markText;
   g2.fillText("Солнце", sx, sy<0 ? sy-rSun-9 : sy+rSun+15);
   g2.restore();
