@@ -5,7 +5,7 @@ const html = fs.readFileSync('barycenter.html', 'utf8');
 const m = html.match(/<script>([\s\S]*)<\/script>/);
 if (!m) throw new Error('script not found');
 let code = m[1];
-code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,jd,fmt,openModal,closeModal,resize,windowStats,paintStats,getSizes:()=>[W1,H1,W2,H2,W3,H3]};';
+code += '\nglobalThis.__T={state,Rv,at,N,T0,ST,RS,PL,planet,Rof,setDate,parseIn,fmtIn,setWindow,chartT,applyJump,applyTheme,PAL,getTH:()=>TH,sunTint,sunShift,sunTexture,paintSun,jd,fmt,openModal,closeModal,resize,windowStats,paintStats,getSizes:()=>[W1,H1,W2,H2,W3,H3]};';
 
 let checks = 0, fails = 0;
 const ok = (name, cond, detail) => {
@@ -24,6 +24,9 @@ function ctxStub() {
   return new Proxy(t, {
     get(o, p) {
       if (p in o) return o[p];
+      if (p === 'createRadialGradient' || p === 'createLinearGradient') {
+        return () => ({ addColorStop() {} });
+      }
       return function () {};
     },
     set(o, p, v) { o[p] = v; return true; }
@@ -296,6 +299,18 @@ ok('сводка по окну считает минимум', ws.mn > 0 && ws.m
 ok('доля вне фотосферы правдоподобна', ws.frac > 0.3 && ws.frac < 0.95, (ws.frac * 100).toFixed(1) + ' %');
 T.paintStats();
 ok('сводка выводится в поля', nodes.wmax.textContent.includes('км'), nodes.wmax.textContent + ' / ' + nodes.wout.textContent);
+
+const t5 = T.sunTint(0.5);
+ok('sunTint отдаёт компоненты цвета', [t5.r, t5.g, t5.b].every(v => typeof v === 'number' && v >= 0 && v <= 255),
+   t5.r + ',' + t5.g + ',' + t5.b);
+const tex1 = T.sunTexture(), tex2 = T.sunTexture();
+ok('текстура Солнца кешируется', tex1 === tex2, tex1 === tex2 ? 'один объект' : 'создаётся заново');
+ok('paintSun не падает на малом радиусе', (() => {
+  try { T.paintSun(nodes.c2._ctx || {save(){},restore(){},beginPath(){},arc(){},fill(){},stroke(){},
+    createRadialGradient(){return {addColorStop(){}};},clip(){},translate(){},rotate(){},drawImage(){},
+    set fillStyle(v){}, set strokeStyle(v){}, set lineWidth(v){}, set globalAlpha(v){}} , 0, 0, 11, T.sunTint(0.5), 0.5, 0); return true; }
+  catch (e) { return false; }
+})(), 'вызов прошёл');
 
 console.log('\nпроверок: ' + checks + ', провалов: ' + fails);
 process.exit(fails ? 1 : 0);

@@ -376,9 +376,62 @@ function sunTint(t){
   }
   const k=(t-a[0])/((b[0]-a[0])||1);
   const r=Math.round(a[1]+(b[1]-a[1])*k), g=Math.round(a[2]+(b[2]-a[2])*k), bl=Math.round(a[3]+(b[3]-a[3])*k);
-  return {disc:"rgb("+r+","+g+","+bl+")", edge:"rgb("+Math.round(r*0.78)+","+Math.round(g*0.72)+","+Math.round(bl*0.55)+")"};
+  return {r:r,g:g,b:bl, disc:"rgb("+r+","+g+","+bl+")", edge:"rgb("+Math.round(r*0.78)+","+Math.round(g*0.72)+","+Math.round(bl*0.55)+")"};
 }
 function sunShift(t){return Math.min(1,Rof(t)/1.6e6);}
+
+let sunTex=null;
+function sunTexture(){
+  if(sunTex) return sunTex;
+  const S=256, c=document.createElement("canvas");
+  c.width=S; c.height=S;
+  const x=c.getContext("2d");
+  x.fillStyle="#ffffff"; x.fillRect(0,0,S,S);
+  for(let i=0;i<2600;i++){
+    const px=Math.random()*S, py=Math.random()*S, rr=0.8+Math.random()*4.2;
+    const a=0.04+Math.random()*0.14;
+    x.beginPath(); x.arc(px,py,rr,0,7);
+    x.fillStyle=Math.random()<0.58 ? "rgba(255,255,255,"+a+")" : "rgba(120,58,8,"+(a*0.85)+")";
+    x.fill();
+  }
+  sunTex=c; return c;
+}
+function shade(st,target,k){
+  const m=(a,b)=>Math.round(a+(b-a)*k);
+  return "rgb("+m(st.r,target)+","+m(st.g,target)+","+m(st.b,target)+")";
+}
+function paintSun(g,x,y,r,st,ts,t){
+  const glowR=r*2.8;
+  const gg=g.createRadialGradient(x,y,r*0.8,x,y,glowR);
+  gg.addColorStop(0,"rgba("+st.r+","+st.g+","+st.b+",0.30)");
+  gg.addColorStop(0.3,"rgba("+st.r+","+st.g+","+st.b+",0.11)");
+  gg.addColorStop(0.62,"rgba("+st.r+","+st.g+","+st.b+",0.035)");
+  gg.addColorStop(1,"rgba("+st.r+","+st.g+","+st.b+",0)");
+  g.fillStyle=gg; g.beginPath(); g.arc(x,y,glowR,0,7); g.fill();
+
+  const dg=g.createRadialGradient(x-r*0.18,y-r*0.18,r*0.04,x,y,r*1.02);
+  dg.addColorStop(0,shade(st,255,0.34));
+  dg.addColorStop(0.42,shade(st,255,0.10));
+  dg.addColorStop(0.72,st.disc);
+  dg.addColorStop(0.92,shade(st,0,0.09));
+  dg.addColorStop(1,st.edge);
+  g.fillStyle=dg; g.beginPath(); g.arc(x,y,r,0,7); g.fill();
+
+  if(r>16){
+    g.save();
+    g.beginPath(); g.arc(x,y,r,0,7); g.clip();
+    g.globalAlpha=0.14;
+    g.translate(x,y); g.rotate((t||0)*0.02);
+    const S=r*2.9;
+    g.drawImage(sunTexture(),-S/2,-S/2,S,S);
+    g.restore();
+  }
+
+  g.beginPath(); g.arc(x,y,r,0,7);
+  g.strokeStyle="rgba("+st.r+","+st.g+","+st.b+",0.6)";
+  g.lineWidth=Math.max(0.8,r*0.014);
+  g.stroke();
+}
 
 function planet(P,T){
   const a=P.a+P.da*T, e=P.e+P.de*T, I=(P.i+P.di*T)*RAD;
@@ -441,8 +494,7 @@ function drawSystem(){
   }
 
   const ts=sunShift(state.t), st=sunTint(ts);
-  g1.beginPath(); g1.arc(0,0,11,0,7); g1.fillStyle=st.disc; g1.fill();
-  g1.strokeStyle=st.edge; g1.lineWidth=1+1.5*ts; g1.stroke();
+  paintSun(g1,0,0,11,st,ts,state.t);
 
   const T=(state.t-2451545.0)/36525;
   const dps=state.speed*365.25;
@@ -494,11 +546,7 @@ function drawSun(){
   }
 
   const rSun=RS*scale, ts=sunShift(state.t), st=sunTint(ts);
-  g2.beginPath(); g2.arc(sx,sy,rSun,0,7);
-  g2.fillStyle=st.disc; g2.fill();
-  g2.strokeStyle=st.edge; g2.lineWidth=1; g2.stroke();
-  g2.beginPath(); g2.arc(sx,sy,rSun*0.985,0,7);
-  g2.globalAlpha=0.35; g2.strokeStyle=st.edge; g2.lineWidth=0.8; g2.stroke(); g2.globalAlpha=1;
+  paintSun(g2,sx,sy,rSun,st,ts,state.t);
 
   const outside=Math.hypot(p[0],p[1])>RS;
   g2.strokeStyle=outside?TH.markOut:TH.mark; g2.lineWidth=1.2;
@@ -508,7 +556,7 @@ function drawSun(){
   g2.font="10px -apple-system,Segoe UI,sans-serif"; g2.fillStyle=TH.markText; g2.textAlign="left";
   g2.fillText("барицентр", 14, -8);
   g2.textAlign="center"; g2.fillStyle=TH.markText;
-  g2.fillText("Солнце", sx, sy+rSun+14);
+  g2.fillText("Солнце", sx, sy<0 ? sy-rSun-9 : sy+rSun+15);
   g2.restore();
 }
 
