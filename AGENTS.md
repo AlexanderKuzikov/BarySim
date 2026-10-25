@@ -6,6 +6,7 @@
 - сборка страницы: `python build.py`
 - сборка кино-версии: `python build_cinematic.py`
 - проверка: `node smoke.mjs`, `node smoke_cinematic.mjs`
+- проверка раскладки: `node shots.mjs` (нужен Chromium из кеша Playwright)
 - статистика вкладов: `python analyze.py`
 - сверка модели с Horizons: `python compare.py` (нужен `horizons.txt`)
 
@@ -29,7 +30,10 @@
 - `build.py` — подстановка `hz.json` в шаблон, результат `barycenter.html`.
 - `template_cinematic.html` — шаблон кинематографической сцены, тот же `{{DATA}}`.
 - `build_cinematic.py` — сборка `cinematic.html`.
-- `smoke.mjs` — headless-стенд аналитической версии, 16 проверок.
+- `smoke.mjs` — headless-стенд аналитической версии, 60 проверок.
+- `shots.mjs` — проверка раскладки в реальном Chromium: девять разрешений,
+  скриншоты в `shots/`, 60 утверждений (прокрутка, квадратность сцен,
+  стабильность блока чисел). Требует `playwright-core` и Chromium вне репозитория.
 - `smoke_cinematic.mjs` — стенд кино-версии, 21 проверка (включая проекцию).
 - `analyze.py` — таблица вкладов планет и статистика 1800–2200.
 - `compare.py` — сверка кеплеровской модели с эталоном Horizons.
