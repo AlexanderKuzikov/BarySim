@@ -12,3 +12,4 @@ _*.html
 _*.mjs
 .ctmp/
 shots/
+*.cdr
